@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <application
+        android:name=".WorldClockTileApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="true" />
+
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".presentation.TileManagementActivity"
+            android:exported="true"
+            android:label="@string/title_activity_presentation._tile_management"
+            android:theme="@android:style/Theme.DeviceDefault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".presentation.TileSettingsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_presentation._settings"
+            android:theme="@android:style/Theme.DeviceDefault" />
+
+        <!-- Tile services - Only the first is enabled on install, the others can be enabled in the app -->
+        <service
+            android:name=".WorldClockTileService0"
+            android:description="@string/tile_description"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService1"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService2"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService3"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService4"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService5"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService6"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService7"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService8"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+        <service
+            android:name=".WorldClockTileService9"
+            android:description="@string/tile_description"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview"
+                tools:ignore="SquareAndRoundTilePreviews" />
+        </service>
+    </application>
+
+</manifest>

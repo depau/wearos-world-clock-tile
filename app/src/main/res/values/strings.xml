@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">World clock tile</string>
+    <string name="tile_label">World clock</string>
+    <string name="tile_description">Displays a given timezone\'s clock</string>
+    <string name="tap_to_open_settings">Tap to open settings…</string>
+
+    <string name="color_graphite">Graphite</string>
+    <string name="color_cloud">Cloud</string>
+    <string name="color_almond">Almond</string>
+    <string name="color_watermelon">Watermelon</string>
+    <string name="color_coral">Coral</string>
+    <string name="color_pomelo">Pomelo</string>
+    <string name="color_guava">Guava</string>
+    <string name="color_peach">Peach</string>
+    <string name="color_champagne">Champagne</string>
+    <string name="color_chai">Chai</string>
+    <string name="color_sand">Sand</string>
+    <string name="color_honey">Honey</string>
+    <string name="color_melon">Melon</string>
+    <string name="color_wheat">Wheat</string>
+    <string name="color_dandelion">Dandelion</string>
+    <string name="color_limoncello">Limoncello</string>
+    <string name="color_lemongrass">Lemongrass</string>
+    <string name="color_lime">Lime</string>
+    <string name="color_pear">Pear</string>
+    <string name="color_spearmint">Spearmint</string>
+    <string name="color_fern">Fern</string>
+    <string name="color_forest">Forest</string>
+    <string name="color_mint">Mint</string>
+    <string name="color_jade">Jade</string>
+    <string name="color_sage">Sage</string>
+    <string name="color_stream">Stream</string>
+    <string name="color_aqua">Aqua</string>
+    <string name="color_sky">Sky</string>
+    <string name="color_ocean">Ocean</string>
+    <string name="color_sapphire">Sapphire</string>
+    <string name="color_amethyst">Amethyst</string>
+    <string name="color_lilac">Lilac</string>
+    <string name="color_lavender">Lavender</string>
+    <string name="color_flamingo">Flamingo</string>
+    <string name="color_bubble_gum">Bubble Gum</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <string name="title_activity_presentation._settings">Tile settings</string>
+    <string name="title_activity_presentation._tile_management">
+        World clock tiles settings
+    </string>
+</resources>

@@ -2,7 +2,9 @@
 
 Add up to 10 cities of the world next to your watch face.
 
-![Screenshot][images/screen0.png] ![Screenshot][images/screen1.png] ![Screenshot][images/screen2.png] ![Screenshot][images/screen3.png] ![Screenshot][images/screen4.png] ![Screenshot][images/screen5.png]
+<p align="center">
+<img src="images/screen0.png" width=200 /> <img src="images/screen1.png" width=200 /> <img src="images/screen2.png" width=200 /> <img src="images/screen3.png" width=200 /> <img src="images/screen4.png" width=200 /> <img src="images/screen5.png" width=200 />
+</p>
 
 ## How to use
 

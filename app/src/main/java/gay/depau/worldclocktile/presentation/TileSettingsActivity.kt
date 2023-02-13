@@ -355,8 +355,21 @@ fun MainSettingsView(
                 TilePreviewModule(viewModel = viewModel)
             }
             item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
-            item("heading") { Text("Tile settings") }
-            item("spacer2") { Spacer(modifier = Modifier) }
+            item("caret") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_caret_down),
+                        contentDescription = "Caret",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+            }
+            item("spacer2") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("heading") { Text("Settings") }
+            item("spacer3") { Spacer(modifier = Modifier) }
             item("nameButton") {
                 Chip(modifier = Modifier.fillMaxWidth(),
                     label = { Text("Name") },
@@ -442,7 +455,7 @@ fun MainSettingsView(
                     })
             }
 
-            item("spacer3") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer4") { Spacer(modifier = Modifier.height(8.dp)) }
 
             item("manageTilesButton") {
                 Chip(modifier = Modifier.fillMaxWidth(),
@@ -457,7 +470,7 @@ fun MainSettingsView(
                     })
             }
 
-            item("spacer4") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer5") { Spacer(modifier = Modifier.height(8.dp)) }
 
             item("aboutButton") {
                 Row(

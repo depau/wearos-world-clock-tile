@@ -141,7 +141,7 @@ fun AboutView() {
                     softWrap = true,
                     textAlign = TextAlign.Center,
                     lineHeight = 16.sp,
-                    text = "World Clock Tile\nfor Wear OS",
+                    text = "World Clock\nfor Wear OS",
                     style = MaterialTheme.typography.caption2
                 )
             }

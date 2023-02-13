@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "World Clock Tile"
+rootProject.name = "World Clock"
 include ':app'
 include ':tzdb_generator'

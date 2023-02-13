@@ -1,6 +1,6 @@
-# World Clock Tile for WearOS
+# World Clock for WearOS
 
-Add up to 10 cities of the world next to your watch face.
+View the timezone of up to 10 cities of the world and add them as tiles to your Wear OS watch.
 
 <p align="center">
 <img src="images/screen0.png" width=200 /> <img src="images/screen1.png" width=200 /> <img src="images/screen2.png" width=200 /> <img src="images/screen3.png" width=200 /> <img src="images/screen4.png" width=200 /> <img src="images/screen5.png" width=200 />
@@ -10,7 +10,7 @@ Add up to 10 cities of the world next to your watch face.
 
 Once installed you will be able to add only one timezone tile.
 
-To add more, tap on the tile, select "Manage tiles…" and tap "Add tile".
+To add more, tap on the tile, select "All cities…" and tap "Add city".
 
 The tiles will show up in the "Add to carousel" menu. Long press any tile and click `+` to add them.
 

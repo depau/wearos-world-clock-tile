@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">World clock tile</string>
+    <string name="app_name">World clock</string>
     <string name="tile_label">World clock</string>
     <string name="tile_description">Displays a given timezone\'s clock</string>
     <string name="tap_to_open_settings">Tap to open settings…</string>
@@ -43,6 +43,6 @@
 
     <string name="title_activity_presentation._settings">Tile settings</string>
     <string name="title_activity_presentation._tile_management">
-        World clock tiles settings
+        World clock
     </string>
 </resources>

@@ -412,13 +412,13 @@ fun MainSettingsView(
             item("manageTilesButton") {
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Manage tiles…") },
+                    label = { Text("All cities…") },
                     onClick = openTileManagement,
                     colors = themedChipColors { state.colorScheme },
                     icon = {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_settings),
-                            contentDescription = "Manage tiles"
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_globe),
+                            contentDescription = "View all cities"
                         )
                     })
             }

@@ -207,7 +207,7 @@ fun TileManagementView(
         ) {
             item("title") {
                 Text(
-                    text = "World clock tiles",
+                    text = "World clock",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.title2
                 )
@@ -267,7 +267,7 @@ fun TileManagementView(
                 ) {
                     CompactChip(
                         label = {
-                            Text(text = "Add tile")
+                            Text(text = "Add city")
                         },
                         enabled = canAddTiles,
                         onClick = {
@@ -276,7 +276,7 @@ fun TileManagementView(
                         icon = {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_add),
-                                contentDescription = "Add tile"
+                                contentDescription = "Add city"
                             )
                         }
                     )
@@ -290,7 +290,7 @@ fun TileManagementView(
                     enabled = false,
                 ) {
                     Text(
-                        text = "Add up to 10 tiles here, then add them to your carousel from your watch home.",
+                        text = "Add up to 10 cities here, then add them to your tiles carousel from your watch home.",
                         modifier = Modifier.padding(8.dp),
                         textAlign = TextAlign.Center
                     )

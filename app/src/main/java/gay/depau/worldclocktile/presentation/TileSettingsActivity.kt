@@ -334,13 +334,13 @@ fun MainSettingsView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
+            item("preview") {
                 TilePreviewModule(viewModel = viewModel)
             }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-            item { Text("Tile settings") }
-            item { Spacer(modifier = Modifier) }
-            item {
+            item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("heading") { Text("Tile settings") }
+            item("spacer2") { Spacer(modifier = Modifier) }
+            item("timezoneButton") {
                 Chip(modifier = Modifier.fillMaxWidth(),
                     label = { Text("Time zone") },
                     secondaryLabel = {
@@ -359,7 +359,7 @@ fun MainSettingsView(
                         )
                     })
             }
-            item {
+            item("colorButton") {
                 Chip(modifier = Modifier.fillMaxWidth(),
                     label = { Text("Color") },
                     secondaryLabel = {
@@ -385,7 +385,7 @@ fun MainSettingsView(
                     })
             }
 
-            item {
+            item("24hourButton") {
                 val context = LocalContext.current
                 val themeColor by remember { derivedStateOf { state.colorScheme.getColor(context).composeColor } }
                 ToggleChip(modifier = Modifier.fillMaxWidth(),
@@ -407,9 +407,9 @@ fun MainSettingsView(
                     })
             }
 
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer3") { Spacer(modifier = Modifier.height(8.dp)) }
 
-            item {
+            item("manageTilesButton") {
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Manage tiles…") },
@@ -423,9 +423,9 @@ fun MainSettingsView(
                     })
             }
 
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer4") { Spacer(modifier = Modifier.height(8.dp)) }
 
-            item {
+            item("aboutButton") {
                 Row(
                     modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
@@ -472,17 +472,17 @@ fun ColorSelectionView(setColorScheme: (ColorScheme) -> Unit, selectedColor: Col
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item { Text("Colors") }
-            item { Spacer(modifier = Modifier) }
+            item("heading") { Text("Colors") }
+            item("spacer") { Spacer(modifier = Modifier) }
 
             if (forceRefresh) {
-                item {
+                item("forceRefresh") {
                     LaunchedEffect(Unit) {
                         forceRefresh = false
                     }
                 }
             } else {
-                items(ColorScheme.values()) { colorScheme ->
+                items(ColorScheme.values(), key = { it.name }) { colorScheme ->
                     val isCurrentColor = remember(colorScheme, selectedColor) {
                         colorScheme == selectedColor
                     }
@@ -531,7 +531,7 @@ fun ContinentSelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
+            item("searchButton") {
                 Chip(modifier = Modifier.fillMaxWidth(),
                     label = { Text("Search") },
                     onClick = { openSearch() },
@@ -543,7 +543,7 @@ fun ContinentSelectionView(
                         )
                     })
             }
-            item {
+            item("stdTimezoneButton") {
                 Chip(modifier = Modifier.fillMaxWidth(),
                     label = { Text("Standard time zones") },
                     onClick = { openStdTimeZoneSelection() },
@@ -555,10 +555,10 @@ fun ContinentSelectionView(
                         )
                     })
             }
-            item { Spacer(modifier = Modifier) }
-            item { Text("Continents") }
+            item("spacer") { Spacer(modifier = Modifier) }
+            item("heading") { Text("Continents") }
 
-            items(continents) {
+            items(continents, key = { it }) {
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) },
@@ -609,10 +609,10 @@ fun StdTimezoneSelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item { Text("Standard time zones") }
-            item { Spacer(modifier = Modifier) }
+            item("heading") { Text("Standard time zones") }
+            item("spacer") { Spacer(modifier = Modifier) }
 
-            items(stdTimezones) {
+            items(stdTimezones, key = { it }) {
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(it) },
@@ -649,10 +649,10 @@ fun CountrySelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item { Text("Countries in $continent", textAlign = TextAlign.Center) }
-            item { Spacer(modifier = Modifier) }
+            item ("heading") { Text("Countries in $continent", textAlign = TextAlign.Center) }
+            item ("spacer") { Spacer(modifier = Modifier) }
 
-            items(countries) {
+            items(countries, key = { it.country }) {
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(it.country, maxLines = 2, overflow = TextOverflow.Ellipsis) },
@@ -692,15 +692,15 @@ fun ProvinceSelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
+            item ("heading") {
                 @Suppress("DEPRECATION") Text(
                     "${provincesDenomination.capitalize(Locale.ENGLISH)} in $country",
                     textAlign = TextAlign.Center
                 )
             }
-            item { Spacer(modifier = Modifier) }
+            item ("spacer") { Spacer(modifier = Modifier) }
 
-            items(provinces) {
+            items(provinces, key = { it }) {
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) },
@@ -735,13 +735,13 @@ fun CitySelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
+            item ("heading") {
                 if (province.isEmpty()) Text("Cities in $country", textAlign = TextAlign.Center)
                 else Text("Cities in $province", textAlign = TextAlign.Center)
             }
-            item { Spacer(modifier = Modifier) }
+            item("spacer") { Spacer(modifier = Modifier) }
 
-            items(cities) {
+            items(cities, key = { it }) {
                 val localTimeStr by remember {
                     derivedStateOf {
                         currentTimeAt(it.timezone).let {
@@ -794,7 +794,7 @@ fun SearchView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
+            item ("searchInput") {
                 val themeColor by remember { derivedStateOf { state.colorScheme.getColor(context).composeColor } }
                 val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -822,9 +822,9 @@ fun SearchView(
                     ),
                 )
             }
-            item { Spacer(modifier = Modifier) }
+            item("spacer") { Spacer(modifier = Modifier) }
 
-            items(results) {
+            items(results, key = { it.rowid }) {
                 val localTimeStr by remember {
                     derivedStateOf {
                         currentTimeAt(it.timezone).let {

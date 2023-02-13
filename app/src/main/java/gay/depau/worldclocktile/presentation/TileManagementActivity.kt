@@ -204,15 +204,15 @@ fun TileManagementView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
+            item("title") {
                 Text(
                     text = "World clock tiles",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.title2
                 )
             }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-            items(state.enabledTileIds) { i ->
+            item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
+            items(state.enabledTileIds, key = { it }) { i ->
                 val settings by remember { derivedStateOf { state.tileSettings[i]!! } }
 
                 ChipWithDeleteButton(
@@ -251,8 +251,8 @@ fun TileManagementView(
                     onDelete = { tileToDelete = i },
                 )
             }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-            item {
+            item("spacer2") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("addBtn") {
                 val canAddTiles by viewModel.canAddTiles()
                 Row(
                     modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
@@ -274,8 +274,8 @@ fun TileManagementView(
                     )
                 }
             }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-            item {
+            item("spacer3") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("helpCard") {
                 Card(
                     onClick = { },
                     modifier = Modifier.fillMaxWidth(),
@@ -288,8 +288,8 @@ fun TileManagementView(
                     )
                 }
             }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-            item {
+            item("spacer4") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("aboutBtn") {
                 Row(
                     modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {

@@ -55,6 +55,7 @@ import gay.depau.worldclocktile.*
 import gay.depau.worldclocktile.R
 import gay.depau.worldclocktile.composables.MainView
 import gay.depau.worldclocktile.composables.ScalingLazyColumnWithRSB
+import gay.depau.worldclocktile.composables.rememberForeverScalingLazyListState
 import gay.depau.worldclocktile.presentation.theme.chipGradientColors
 import gay.depau.worldclocktile.presentation.theme.themedChipColors
 import gay.depau.worldclocktile.presentation.theme.toggleChipColors
@@ -117,6 +118,8 @@ class TileSettingsActivity : ComponentActivity() {
         setContent {
             val navController = rememberSwipeDismissableNavController()
             val state by mViewModel.state.collectAsState()
+            var queryStartTime by remember { mutableStateOf(System.currentTimeMillis()) }
+
             SwipeDismissableNavHost(
                 modifier = Modifier.fillMaxSize(),
                 navController = navController,
@@ -130,7 +133,10 @@ class TileSettingsActivity : ComponentActivity() {
                             refreshTile()
                         },
                         openColorSelection = { navController.navigate("select_color") },
-                        openTimeZoneSelection = { navController.navigate("select_continent") },
+                        openTimeZoneSelection = {
+                            navController.navigate("select_continent")
+                            queryStartTime = System.currentTimeMillis()
+                        },
                         openAbout = { navController.navigate("about") },
                         openTileManagement = { goToManagementActivityAndClose() },
                     )
@@ -152,17 +158,19 @@ class TileSettingsActivity : ComponentActivity() {
                             navController.navigate("select_country")
                         },
                         openSearch = { navController.navigate("search") },
+                        queryStartTime = queryStartTime
                     )
                 }
                 composable("search") {
                     SearchView(
                         viewModel = mViewModel,
+                        queryStartTime = queryStartTime,
                         setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
                             mSettings.cityName = city
                             refreshTile()
                             navController.popBackStack("main", false)
-                        },
+                        }
                     )
                 }
                 composable("select_std_timezone") {
@@ -174,10 +182,12 @@ class TileSettingsActivity : ComponentActivity() {
                             refreshTile()
                             navController.popBackStack("main", false)
                         },
+                        queryStartTime = queryStartTime
                     )
                 }
                 composable("select_country") {
-                    CountrySelectionView(viewModel = mViewModel,
+                    CountrySelectionView(
+                        viewModel = mViewModel,
                         continent = state.selectedContinent,
                         openProvinces = { country, denomination ->
                             mViewModel.selectCountry(
@@ -190,16 +200,21 @@ class TileSettingsActivity : ComponentActivity() {
                                 country, province = province
                             )
                             navController.navigate("select_city")
-                        })
+                        },
+                        queryStartTime = queryStartTime
+                    )
                 }
                 composable("select_province") {
-                    ProvinceSelectionView(viewModel = mViewModel,
+                    ProvinceSelectionView(
+                        viewModel = mViewModel,
                         country = state.selectedCountry,
                         provincesDenomination = state.provincesDenomination,
                         openCities = { country, province ->
                             mViewModel.selectProvince(country, province)
                             navController.navigate("select_city")
-                        })
+                        },
+                        queryStartTime = queryStartTime
+                    )
                 }
                 composable("select_city") {
                     CitySelectionView(
@@ -212,6 +227,7 @@ class TileSettingsActivity : ComponentActivity() {
                             refreshTile()
                             navController.popBackStack("main", false)
                         },
+                        queryStartTime = queryStartTime
                     )
                 }
                 composable("about") {
@@ -515,8 +531,13 @@ fun ContinentSelectionView(
     openStdTimeZoneSelection: () -> Unit,
     openSearch: () -> Unit,
     selectContinent: (String) -> Unit,
+    queryStartTime: Long = 0L
 ) {
-    val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
+    val listState = rememberForeverScalingLazyListState(
+        key = "continentSelection",
+        params = queryStartTime,
+        initialCenterItemIndex = 0
+    )
     val state by viewModel.state.collectAsState()
     val continents by viewModel.getContinents().collectAsState(initial = emptyList())
 
@@ -572,9 +593,11 @@ fun ContinentSelectionView(
 
 @Composable
 fun StdTimezoneSelectionView(
-    viewModel: TileSettingsViewModel, setTimezoneIDCity: (String, String) -> Unit
+    viewModel: TileSettingsViewModel,
+    queryStartTime: Long = 0L,
+    setTimezoneIDCity: (String, String) -> Unit
 ) {
-    val listState = rememberScalingLazyListState()
+    val listState = rememberForeverScalingLazyListState("stdTimezoneSelection", queryStartTime)
     val state by viewModel.state.collectAsState()
     val stdTimezones by remember {
         derivedStateOf {
@@ -632,8 +655,12 @@ fun CountrySelectionView(
     continent: String,
     openProvinces: (String, String) -> Unit,
     openCities: (String, String) -> Unit,
+    queryStartTime: Long = 0L
 ) {
-    val listState = rememberScalingLazyListState()
+    val listState = rememberForeverScalingLazyListState(
+        key = "countrySelection",
+        params = queryStartTime
+    )
     val state by viewModel.state.collectAsState()
     val countries by viewModel.getCountriesInContinent(continent)
         .collectAsState(initial = emptyList())
@@ -675,9 +702,13 @@ fun ProvinceSelectionView(
     viewModel: TileSettingsViewModel,
     country: String,
     provincesDenomination: String,
-    openCities: (String, String) -> Unit,
+    queryStartTime: Long = 0L,
+    openCities: (String, String) -> Unit
 ) {
-    val listState = rememberScalingLazyListState()
+    val listState = rememberForeverScalingLazyListState(
+        key = "provinceSelection",
+        params = queryStartTime
+    )
     val state by viewModel.state.collectAsState()
     val provinces by viewModel.getProvincesInCountry(country).collectAsState(initial = emptyList())
 
@@ -717,9 +748,13 @@ fun CitySelectionView(
     viewModel: TileSettingsViewModel,
     country: String,
     province: String,
-    setTimezoneIDCity: (String, String) -> Unit,
+    queryStartTime: Long = 0L,
+    setTimezoneIDCity: (String, String) -> Unit
 ) {
-    val listState = rememberScalingLazyListState()
+    val listState = rememberForeverScalingLazyListState(
+        key = "citySelection",
+        params = queryStartTime
+    )
     val state by viewModel.state.collectAsState()
     val cities by viewModel.getCitiesInProvince(country, province)
         .collectAsState(initial = emptyList())
@@ -775,9 +810,13 @@ fun CitySelectionView(
 @Composable
 fun SearchView(
     viewModel: TileSettingsViewModel,
+    queryStartTime: Long = 0L,
     setTimezoneIDCity: (String, String) -> Unit,
 ) {
-    val listState = rememberScalingLazyListState()
+    val listState = rememberForeverScalingLazyListState(
+        key = "search",
+        params = queryStartTime
+    )
     var query by remember { mutableStateOf("") }
     val state by viewModel.state.collectAsState()
     val results by viewModel.searchCities(query).collectAsState(initial = emptyList())

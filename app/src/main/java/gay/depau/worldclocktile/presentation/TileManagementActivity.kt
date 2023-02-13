@@ -245,6 +245,13 @@ fun TileManagementView(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+                        } else {
+                            Text(
+                                text = "Tap to set up",
+                                fontStyle = FontStyle.Italic,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     },
                     colorScheme = settings.colorScheme,
@@ -315,7 +322,14 @@ fun TileManagementView(
             setTileEnabled(tileToDelete!!, false)
             tileToDelete = null
         },
-        dismissDialog = { tileToDelete = null })
+        dismissDialog = { tileToDelete = null }) {
+        Text(
+            text = tileToDeleteName ?: "[Not set]",
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            fontStyle = if (tileToDeleteName == null) FontStyle.Italic else null
+        )
+    }
 }
 
 

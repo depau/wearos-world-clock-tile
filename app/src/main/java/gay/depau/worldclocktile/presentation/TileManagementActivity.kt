@@ -69,7 +69,7 @@ class TileManagementActivity : ComponentActivity() {
                     WorldClockTileService.isTileEnabled(this@TileManagementActivity, i)
                 )
             }
-            mViewModel.setCanEnableMoreTiles(true)
+            mViewModel.setCanAddRemoveTiles(true)
         }
     }
 
@@ -106,23 +106,24 @@ class TileManagementActivity : ComponentActivity() {
             ) {
                 composable("main") {
                     val canEnableMoreTiles by mViewModel.canAddTiles()
+                    val canDeleteTiles by mViewModel.canRemoveTiles()
 
                     TileManagementView(
                         mViewModel,
                         setTileEnabled = { id, enabled ->
-                            if (canEnableMoreTiles) {
+                            if ((enabled && canEnableMoreTiles) || (!enabled && canDeleteTiles)) {
                                 try {
-                                    mViewModel.setCanEnableMoreTiles(false)
+                                    mViewModel.setCanAddRemoveTiles(false)
                                     WorldClockTileService.setTileEnabled(
                                         this@TileManagementActivity,
                                         id,
                                         enabled
                                     )
                                     mViewModel.setTileEnabled(id, enabled)
-                                    if (!enabled)
-                                        mSettings[id]!!.resetTileSettings()
+                                    mSettings[id]!!.resetTileSettings()
                                 } finally {
-                                    mViewModel.setCanEnableMoreTiles(true)
+                                    refreshEnabledTiles()
+                                    mViewModel.setCanAddRemoveTiles(true)
                                 }
                             }
                         },
@@ -304,6 +305,7 @@ fun TileManagementView(
         }
     }
 
+    val tileToDeleteName by remember { derivedStateOf { state.tileSettings[tileToDelete]?.cityName } }
     YesNoConfirmationDialog(
         showDialog = showDeleteDialog,
         title = {

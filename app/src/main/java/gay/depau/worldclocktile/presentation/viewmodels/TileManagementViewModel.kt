@@ -80,7 +80,7 @@ class TileManagementViewModel : ViewModel(), SettingChangeListener {
         }
     }
 
-    fun setCanEnableMoreTiles(value: Boolean) {
+    fun setCanAddRemoveTiles(value: Boolean) {
         _state.update {
             it.copy(canAddRemoveTiles = value)
         }

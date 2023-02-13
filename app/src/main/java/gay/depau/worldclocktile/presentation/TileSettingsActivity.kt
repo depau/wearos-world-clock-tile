@@ -649,8 +649,8 @@ fun CountrySelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item ("heading") { Text("Countries in $continent", textAlign = TextAlign.Center) }
-            item ("spacer") { Spacer(modifier = Modifier) }
+            item("heading") { Text("Countries in $continent", textAlign = TextAlign.Center) }
+            item("spacer") { Spacer(modifier = Modifier) }
 
             items(countries, key = { it.country }) {
                 Chip(
@@ -692,13 +692,13 @@ fun ProvinceSelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item ("heading") {
+            item("heading") {
                 @Suppress("DEPRECATION") Text(
                     "${provincesDenomination.capitalize(Locale.ENGLISH)} in $country",
                     textAlign = TextAlign.Center
                 )
             }
-            item ("spacer") { Spacer(modifier = Modifier) }
+            item("spacer") { Spacer(modifier = Modifier) }
 
             items(provinces, key = { it }) {
                 Chip(
@@ -735,13 +735,13 @@ fun CitySelectionView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item ("heading") {
+            item("heading") {
                 if (province.isEmpty()) Text("Cities in $country", textAlign = TextAlign.Center)
                 else Text("Cities in $province", textAlign = TextAlign.Center)
             }
             item("spacer") { Spacer(modifier = Modifier) }
 
-            items(cities, key = { it }) {
+            items(cities, key = { it.rowid }) {
                 val localTimeStr by remember {
                     derivedStateOf {
                         currentTimeAt(it.timezone).let {
@@ -794,7 +794,7 @@ fun SearchView(
             anchorType = ScalingLazyListAnchorType.ItemCenter,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item ("searchInput") {
+            item("searchInput") {
                 val themeColor by remember { derivedStateOf { state.colorScheme.getColor(context).composeColor } }
                 val keyboardController = LocalSoftwareKeyboardController.current
 

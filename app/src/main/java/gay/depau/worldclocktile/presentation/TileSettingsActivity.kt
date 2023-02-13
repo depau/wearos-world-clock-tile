@@ -22,7 +22,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -412,12 +411,11 @@ fun MainSettingsView(
                         Text(colorName)
                     },
                     onClick = openColorSelection,
-                    colors = themedChipColors(
-                        iconColor = Color.Unspecified, disabledIconColor = Color.Unspecified
-                    ) { state.colorScheme },
+                    colors = themedChipColors { state.colorScheme },
                     icon = {
-                        ColorIcon(
-                            modifier = Modifier.size(20.dp), state.colorScheme, state.colorScheme
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_palette),
+                            contentDescription = "Color"
                         )
                     })
             }

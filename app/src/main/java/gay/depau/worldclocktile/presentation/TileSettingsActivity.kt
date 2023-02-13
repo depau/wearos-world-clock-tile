@@ -55,6 +55,7 @@ import gay.depau.worldclocktile.*
 import gay.depau.worldclocktile.R
 import gay.depau.worldclocktile.composables.MainView
 import gay.depau.worldclocktile.composables.ScalingLazyColumnWithRSB
+import gay.depau.worldclocktile.composables.TextInputDialog
 import gay.depau.worldclocktile.composables.rememberForeverScalingLazyListState
 import gay.depau.worldclocktile.presentation.theme.chipGradientColors
 import gay.depau.worldclocktile.presentation.theme.themedChipColors
@@ -126,8 +127,7 @@ class TileSettingsActivity : ComponentActivity() {
                 startDestination = "main"
             ) {
                 composable("main") {
-                    MainSettingsView(
-                        mViewModel,
+                    MainSettingsView(mViewModel,
                         set24Hour = {
                             mSettings.time24h = it
                             refreshTile()
@@ -140,7 +140,7 @@ class TileSettingsActivity : ComponentActivity() {
                         },
                         openAbout = { navController.navigate("about") },
                         openTileManagement = { goToManagementActivityAndClose() },
-                    )
+                        renameCity = { mSettings.cityName = it })
                 }
                 composable("select_color") {
                     ColorSelectionView(
@@ -163,8 +163,7 @@ class TileSettingsActivity : ComponentActivity() {
                     )
                 }
                 composable("search") {
-                    SearchView(
-                        viewModel = mViewModel,
+                    SearchView(viewModel = mViewModel,
                         queryStartTime = queryStartTime,
                         setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
@@ -172,20 +171,17 @@ class TileSettingsActivity : ComponentActivity() {
                             mViewModel.resetDbCache()
                             refreshTile()
                             navController.popBackStack("main", false)
-                        }
-                    )
+                        })
                 }
                 composable("select_std_timezone") {
                     StdTimezoneSelectionView(
-                        viewModel = mViewModel,
-                        setTimezoneIDCity = { timezoneId, city ->
+                        viewModel = mViewModel, setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
                             mSettings.cityName = city
                             mViewModel.resetDbCache()
                             refreshTile()
                             navController.popBackStack("main", false)
-                        },
-                        queryStartTime = queryStartTime
+                        }, queryStartTime = queryStartTime
                     )
                 }
                 composable("select_country") {
@@ -339,9 +335,11 @@ fun MainSettingsView(
     openTimeZoneSelection: () -> Unit,
     openAbout: () -> Unit,
     openTileManagement: () -> Unit,
+    renameCity: (String) -> Unit,
 ) {
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
     val state by viewModel.state.collectAsState()
+    var showRenameDialog by remember { mutableStateOf(false) }
 
     MainView(listState) {
         ScalingLazyColumnWithRSB(
@@ -360,6 +358,25 @@ fun MainSettingsView(
             item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
             item("heading") { Text("Tile settings") }
             item("spacer2") { Spacer(modifier = Modifier) }
+            item("nameButton") {
+                Chip(modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Name") },
+                    secondaryLabel = {
+                        Text(
+                            text = state.cityName ?: "[not set]",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    onClick = { showRenameDialog = true },
+                    colors = themedChipColors { state.colorScheme },
+                    icon = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_label),
+                            contentDescription = "Name"
+                        )
+                    })
+            }
             item("timezoneButton") {
                 Chip(modifier = Modifier.fillMaxWidth(),
                     label = { Text("Time zone") },
@@ -430,8 +447,7 @@ fun MainSettingsView(
             item("spacer3") { Spacer(modifier = Modifier.height(8.dp)) }
 
             item("manageTilesButton") {
-                Chip(
-                    modifier = Modifier.fillMaxWidth(),
+                Chip(modifier = Modifier.fillMaxWidth(),
                     label = { Text("All cities…") },
                     onClick = openTileManagement,
                     colors = themedChipColors { state.colorScheme },
@@ -459,6 +475,22 @@ fun MainSettingsView(
             }
         }
     }
+
+    TextInputDialog(
+        showDialog = showRenameDialog,
+        title = { Text("Set city name") },
+        inputLabel = "Name",
+        initialValue = { state.cityName ?: "" },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+        ),
+        onSubmit = { name ->
+            renameCity(name)
+            showRenameDialog = false
+        },
+        dismissDialog = { showRenameDialog = false },
+        colorScheme = state.colorScheme
+    )
 }
 
 @Composable
@@ -538,9 +570,7 @@ fun ContinentSelectionView(
     queryStartTime: Long = 0L
 ) {
     val listState = rememberForeverScalingLazyListState(
-        key = "continentSelection",
-        params = queryStartTime,
-        initialCenterItemIndex = 0
+        key = "continentSelection", params = queryStartTime, initialCenterItemIndex = 0
     )
     val state by viewModel.state.collectAsState()
     val continents by viewModel.getContinents()
@@ -667,8 +697,7 @@ fun CountrySelectionView(
     queryStartTime: Long = 0L
 ) {
     val listState = rememberForeverScalingLazyListState(
-        key = "countrySelection",
-        params = queryStartTime
+        key = "countrySelection", params = queryStartTime
     )
     val state by viewModel.state.collectAsState()
     val countries by viewModel.getCountriesInContinent(continent)
@@ -718,8 +747,7 @@ fun ProvinceSelectionView(
     openCities: (String, String) -> Unit
 ) {
     val listState = rememberForeverScalingLazyListState(
-        key = "provinceSelection",
-        params = queryStartTime
+        key = "provinceSelection", params = queryStartTime
     )
     val state by viewModel.state.collectAsState()
     val provinces by viewModel.getProvincesInCountry(country)
@@ -768,8 +796,7 @@ fun CitySelectionView(
     setTimezoneIDCity: (String, String) -> Unit
 ) {
     val listState = rememberForeverScalingLazyListState(
-        key = "citySelection",
-        params = queryStartTime
+        key = "citySelection", params = queryStartTime
     )
     val state by viewModel.state.collectAsState()
     val cities by viewModel.getCitiesInProvince(country, province)
@@ -833,8 +860,7 @@ fun SearchView(
     setTimezoneIDCity: (String, String) -> Unit,
 ) {
     val listState = rememberForeverScalingLazyListState(
-        key = "search",
-        params = queryStartTime
+        key = "search", params = queryStartTime
     )
     var query by remember { mutableStateOf("") }
     val state by viewModel.state.collectAsState()
@@ -939,7 +965,9 @@ fun MainSettingsPreview() {
 
     MainSettingsView(viewModel, {
         viewModel.setState(state.copy(time24h = it))
-    }, {}, {}, {}, {})
+    }, {}, {}, {}, {}, {
+        viewModel.setState(state.copy(cityName = it))
+    })
 }
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)

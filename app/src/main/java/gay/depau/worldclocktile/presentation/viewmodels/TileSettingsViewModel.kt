@@ -11,6 +11,7 @@ import gay.depau.worldclocktile.AppSettings
 import gay.depau.worldclocktile.SettingChangeListener
 import gay.depau.worldclocktile.thisApplicaton
 import gay.depau.worldclocktile.tzdb.City
+import gay.depau.worldclocktile.tzdb.CountryNameAndProvincesDenomination
 import gay.depau.worldclocktile.tzdb.TimezoneDao
 import gay.depau.worldclocktile.utils.ColorScheme
 import kotlinx.coroutines.flow.*
@@ -31,11 +32,95 @@ data class TileSettingsState(
     }
 }
 
+data class DbListResultCache(
+    val continents: List<String> = emptyList(),
+    val queriedContinent: String = "",
+    val countries: List<CountryNameAndProvincesDenomination> = emptyList(),
+    val queriedCountry: String = "",
+    val provinces: List<String> = emptyList(),
+    val queriedProvince: String = "",
+    val cities: List<City> = emptyList(),
+)
+
 class TileSettingsViewModel(
     private val timezoneDao: TimezoneDao
 ) : ViewModel(), SettingChangeListener {
     private val _state = MutableStateFlow(TileSettingsState.Empty)
     val state: StateFlow<TileSettingsState> = _state.asStateFlow()
+
+    private val _dbListResultCache = MutableStateFlow(DbListResultCache())
+    private val dbListResultCache: StateFlow<DbListResultCache> = _dbListResultCache.asStateFlow()
+
+    fun resetDbCache() {
+        _dbListResultCache.update { DbListResultCache() }
+    }
+
+    fun cacheContinents(continents: List<String>) {
+        _dbListResultCache.update { it.copy(continents = continents) }
+    }
+
+    fun cacheCountries(countries: List<CountryNameAndProvincesDenomination>, continent: String) {
+        _dbListResultCache.update { it.copy(countries = countries, queriedContinent = continent) }
+    }
+
+    fun cacheProvinces(provinces: List<String>, country: String) {
+        _dbListResultCache.update { it.copy(provinces = provinces, queriedCountry = country) }
+    }
+
+    fun cacheCities(cities: List<City>, province: String, country: String) {
+        _dbListResultCache.update {
+            it.copy(
+                cities = cities,
+                queriedProvince = province,
+                queriedCountry = country
+            )
+        }
+    }
+
+    fun getContinentsCache() = dbListResultCache.value.continents
+
+    fun getCountriesCache(continent: String): List<CountryNameAndProvincesDenomination> {
+        return if (dbListResultCache.value.queriedContinent == continent) {
+            dbListResultCache.value.countries
+        } else {
+            _dbListResultCache.update {
+                it.copy(
+                    countries = emptyList(),
+                    queriedContinent = continent
+                )
+            }
+            emptyList()
+        }
+    }
+
+    fun getProvincesCache(country: String): List<String> {
+        return if (dbListResultCache.value.queriedCountry == country) {
+            dbListResultCache.value.provinces
+        } else {
+            _dbListResultCache.update {
+                it.copy(
+                    provinces = emptyList(),
+                    queriedCountry = country
+                )
+            }
+            emptyList()
+        }
+    }
+
+    fun getCitiesCache(province: String, country: String): List<City> {
+        return if (dbListResultCache.value.queriedProvince == province && dbListResultCache.value.queriedCountry == country) {
+            dbListResultCache.value.cities
+        } else {
+            _dbListResultCache.update {
+                it.copy(
+                    cities = emptyList(),
+                    queriedProvince = province,
+                    queriedCountry = country
+                )
+            }
+            emptyList()
+        }
+    }
 
 
     override fun refreshSettings(settings: AppSettings) {

@@ -134,6 +134,7 @@ class TileSettingsActivity : ComponentActivity() {
                         },
                         openColorSelection = { navController.navigate("select_color") },
                         openTimeZoneSelection = {
+                            mViewModel.resetDbCache()
                             navController.navigate("select_continent")
                             queryStartTime = System.currentTimeMillis()
                         },
@@ -168,6 +169,7 @@ class TileSettingsActivity : ComponentActivity() {
                         setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
                             mSettings.cityName = city
+                            mViewModel.resetDbCache()
                             refreshTile()
                             navController.popBackStack("main", false)
                         }
@@ -179,6 +181,7 @@ class TileSettingsActivity : ComponentActivity() {
                         setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
                             mSettings.cityName = city
+                            mViewModel.resetDbCache()
                             refreshTile()
                             navController.popBackStack("main", false)
                         },
@@ -224,6 +227,7 @@ class TileSettingsActivity : ComponentActivity() {
                         setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
                             mSettings.cityName = city
+                            mViewModel.resetDbCache()
                             refreshTile()
                             navController.popBackStack("main", false)
                         },
@@ -539,7 +543,12 @@ fun ContinentSelectionView(
         initialCenterItemIndex = 0
     )
     val state by viewModel.state.collectAsState()
-    val continents by viewModel.getContinents().collectAsState(initial = emptyList())
+    val continents by viewModel.getContinents()
+        .collectAsState(initial = viewModel.getContinentsCache())
+
+    LaunchedEffect(continents) {
+        viewModel.cacheContinents(continents)
+    }
 
     MainView(listState) {
         ScalingLazyColumnWithRSB(
@@ -663,7 +672,10 @@ fun CountrySelectionView(
     )
     val state by viewModel.state.collectAsState()
     val countries by viewModel.getCountriesInContinent(continent)
-        .collectAsState(initial = emptyList())
+        .collectAsState(initial = viewModel.getCountriesCache(continent))
+    LaunchedEffect(countries) {
+        viewModel.cacheCountries(countries, continent)
+    }
 
     MainView(listState) {
         ScalingLazyColumnWithRSB(
@@ -710,7 +722,11 @@ fun ProvinceSelectionView(
         params = queryStartTime
     )
     val state by viewModel.state.collectAsState()
-    val provinces by viewModel.getProvincesInCountry(country).collectAsState(initial = emptyList())
+    val provinces by viewModel.getProvincesInCountry(country)
+        .collectAsState(initial = viewModel.getProvincesCache(country))
+    LaunchedEffect(provinces) {
+        viewModel.cacheProvinces(provinces, country)
+    }
 
     MainView(listState) {
         ScalingLazyColumnWithRSB(
@@ -757,7 +773,10 @@ fun CitySelectionView(
     )
     val state by viewModel.state.collectAsState()
     val cities by viewModel.getCitiesInProvince(country, province)
-        .collectAsState(initial = emptyList())
+        .collectAsState(initial = viewModel.getCitiesCache(country, province))
+    LaunchedEffect(cities) {
+        viewModel.cacheCities(cities, country, province)
+    }
 
     MainView(listState) {
         ScalingLazyColumnWithRSB(

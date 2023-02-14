@@ -3,6 +3,10 @@
 View the timezone of up to 10 cities of the world and add them as tiles to your Wear OS watch.
 
 <p align="center">
+<a href='https://play.google.com/store/apps/details?id=gay.depau.worldclocktile&utm_source=github&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' width="250" src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+</p>
+
+<p align="center">
 <img src="images/screen0.png" width=200 /> <img src="images/screen1.png" width=200 /> <img src="images/screen2.png" width=200 /> <img src="images/screen3.png" width=200 /> <img src="images/screen4.png" width=200 /> <img src="images/screen5.png" width=200 />
 </p>
 

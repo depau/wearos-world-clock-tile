@@ -269,7 +269,7 @@ fun TileManagementView(
                     enabled = false,
                 ) {
                     Text(
-                        text = "Add up to 10 cities here, then add them to your tiles carousel from your watch home.",
+                        text = "Add up to 50 cities here, then add them to your tiles carousel from your watch home.",
                         modifier = Modifier.padding(8.dp), textAlign = TextAlign.Center
                     )
                 }

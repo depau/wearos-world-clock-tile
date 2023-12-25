@@ -74,22 +74,27 @@ fun Context.timeLayout(
     val timeString = if (view24h) time?.format(DateTimeFormatter.ofPattern("H:mm")) ?: "__:__"
     else time?.format(DateTimeFormatter.ofPattern("h:mm")) ?: "__:__"
 
-    val timeColor =
-        ColorBuilders.ColorProp.Builder(colorScheme.getColor(this).toArgb().run {
-            if (time != null || hostileText != null) this
-            else this and 0x00FFFFFF or 0x44000000
-        }).build()
+    val timeColor = ColorBuilders.ColorProp.Builder(colorScheme.getColor(this).toArgb().run {
+        if (time != null || hostileText != null) this
+        else this and 0x00FFFFFF or 0x44000000
+    }).build()
 
-    val otherColor =
-        ColorBuilders.ColorProp.Builder(colorScheme.getColorLight(this).toArgb().run {
-            if (time != null || hostileText != null) this
-            else this and 0x00FFFFFF or 0x77000000
-        }).build()
+    val otherColor = ColorBuilders.ColorProp.Builder(colorScheme.getColorLight(this).toArgb().run {
+        if (time != null || hostileText != null) this
+        else this and 0x00FFFFFF or 0x77000000
+    }).build()
 
-    return Box.Builder().setVerticalAlignment(VERTICAL_ALIGN_CENTER)
-        .setWidth(DimensionBuilders.expand()).setHeight(DimensionBuilders.expand()).addContent(
-            Column.Builder().setHorizontalAlignment(HORIZONTAL_ALIGN_CENTER)
-                .setWidth(DimensionBuilders.expand()).addContent(
+    return Box
+        .Builder()
+        .setVerticalAlignment(VERTICAL_ALIGN_CENTER)
+        .setWidth(DimensionBuilders.expand())
+        .setHeight(DimensionBuilders.expand())
+        .addContent(
+            Column
+                .Builder()
+                .setHorizontalAlignment(HORIZONTAL_ALIGN_CENTER)
+                .setWidth(DimensionBuilders.expand())
+                .addContent(
                     Text.Builder().setMaxLines(1).setModifiers(
                         Modifiers.Builder().setPadding(
                             Padding.Builder().setStart(dp(16F)).setEnd(dp(16F)).build()
@@ -99,12 +104,17 @@ fun Context.timeLayout(
                     ).setOverflow(
                         TextOverflowProp.Builder().setValue(TEXT_OVERFLOW_ELLIPSIZE_END).build()
                     ).setText(cityName).build()
-                ).addContent(
+                )
+                .addContent(
                     if (hostileText == null) {
                         Spannable.Builder().addSpan(
                             SpanText.Builder().setText(timeString).setFontStyle(
-                                FontStyle.Builder().setColor(timeColor).setWeight(FONT_WEIGHT_BOLD)
-                                    .setSize(sp(48f)).build()
+                                FontStyle
+                                    .Builder()
+                                    .setColor(timeColor)
+                                    .setWeight(FONT_WEIGHT_BOLD)
+                                    .setSize(sp(48f))
+                                    .build()
                             ).build()
                         ).apply {
                             if (!view24h) addSpan(
@@ -119,15 +129,16 @@ fun Context.timeLayout(
                                 Padding.Builder().setAll(dp(8F)).build()
                             ).build()
                         ).setFontStyle(
-                            FontStyle.Builder().setColor(colorScheme.getColorProp(this))
-                                .setSize(sp(24f)).build()
+                            FontStyle.Builder().setColor(colorScheme.getColorProp(this)).setSize(sp(24f)).build()
                         ).build()
                     }
-                ).addContent(
+                )
+                .addContent(
                     Text.Builder().setFontStyle(
                         FontStyle.Builder().setColor(otherColor).build()
                     ).setText(offset).build()
-                ).build()
+                )
+                .build()
         )
 }
 
@@ -155,36 +166,34 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
         val modifiers = Modifiers.Builder().setClickable(
             Clickable.Builder().setId("tile${tileId}").setOnClick(
                 LaunchAction.Builder().setAndroidActivity(
-                    AndroidActivity.Builder()
+                    AndroidActivity
+                        .Builder()
                         .setClassName(TileSettingsActivity::class.java.name)
-                        .setPackageName(packageName).build()
+                        .setPackageName(packageName)
+                        .build()
                 ).build()
             ).build()
         ).build()
 
-        return Tile.Builder().setResourcesVersion(RESOURCES_VERSION)
-            .setFreshnessIntervalMillis((PRERENDER_MINUTES - 1) * 60 * 1000L).setTileTimeline(
+        return Tile
+            .Builder()
+            .setResourcesVersion(RESOURCES_VERSION)
+            .setFreshnessIntervalMillis((PRERENDER_MINUTES - 1) * 60 * 1000L)
+            .setTileTimeline(
                 Timeline.Builder().addTimelineEntry(
                     TimelineEntry.Builder().setLayout(
                         Layout.Builder().setRoot(
                             timeLayout(
-                                locationName,
-                                null,
-                                timezoneOffsetDescription(
-                                    mSettings.timezoneId ?: TimeZone.getDefault().id,
-                                    hostile = hostileText != null
-                                ),
-                                mSettings.time24h,
-                                mSettings.colorScheme,
-                                hostileText = hostileText
+                                locationName, null, timezoneOffsetDescription(
+                                    mSettings.timezoneId ?: TimeZone.getDefault().id, hostile = hostileText != null
+                                ), mSettings.time24h, mSettings.colorScheme, hostileText = hostileText
                             ).setModifiers(modifiers).build()
                         ).build()
                     ).build()
                 ).apply {
                     for (i in 0 until PRERENDER_MINUTES) {
                         val offset = timezoneOffsetDescription(
-                            mSettings.timezoneId ?: TimeZone.getDefault().id,
-                            minutesOffset = i,
+                            mSettings.timezoneId ?: TimeZone.getDefault().id, minutesOffset = i,
                             hostile = hostileText != null
                         )
 
@@ -192,18 +201,16 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
                             TimelineEntry.Builder().setLayout(
                                 Layout.Builder().setRoot(
                                     timeLayout(
-                                        locationName,
-                                        localTimeAtLocation.plusMinutes(i.toLong()).toLocalTime(),
-                                        offset,
-                                        mSettings.time24h,
-                                        mSettings.colorScheme,
-                                        hostileText = hostileText
+                                        locationName, localTimeAtLocation.plusMinutes(i.toLong()).toLocalTime(), offset,
+                                        mSettings.time24h, mSettings.colorScheme, hostileText = hostileText
                                     ).setModifiers(modifiers).build()
                                 ).build()
                             ).setValidity(
-                                TimeInterval.Builder()
+                                TimeInterval
+                                    .Builder()
                                     .setStartMillis(curTimeMillis + i * 60 * 1000L)
-                                    .setEndMillis(curTimeMillis + (i + 1) * 60 * 1000L).build()
+                                    .setEndMillis(curTimeMillis + (i + 1) * 60 * 1000L)
+                                    .build()
                             ).build()
                         )
                     }
@@ -230,6 +237,47 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
             7 -> WorldClockTileService7::class
             8 -> WorldClockTileService8::class
             9 -> WorldClockTileService9::class
+            10 -> WorldClockTileService10::class
+            11 -> WorldClockTileService11::class
+            12 -> WorldClockTileService12::class
+            13 -> WorldClockTileService13::class
+            14 -> WorldClockTileService14::class
+            15 -> WorldClockTileService15::class
+            16 -> WorldClockTileService16::class
+            17 -> WorldClockTileService17::class
+            18 -> WorldClockTileService18::class
+            19 -> WorldClockTileService19::class
+            20 -> WorldClockTileService20::class
+            21 -> WorldClockTileService21::class
+            22 -> WorldClockTileService22::class
+            23 -> WorldClockTileService23::class
+            24 -> WorldClockTileService24::class
+            25 -> WorldClockTileService25::class
+            26 -> WorldClockTileService26::class
+            27 -> WorldClockTileService27::class
+            28 -> WorldClockTileService28::class
+            29 -> WorldClockTileService29::class
+            30 -> WorldClockTileService30::class
+            31 -> WorldClockTileService31::class
+            32 -> WorldClockTileService32::class
+            33 -> WorldClockTileService33::class
+            34 -> WorldClockTileService34::class
+            35 -> WorldClockTileService35::class
+            36 -> WorldClockTileService36::class
+            37 -> WorldClockTileService37::class
+            38 -> WorldClockTileService38::class
+            39 -> WorldClockTileService39::class
+            40 -> WorldClockTileService40::class
+            41 -> WorldClockTileService41::class
+            42 -> WorldClockTileService42::class
+            43 -> WorldClockTileService43::class
+            44 -> WorldClockTileService44::class
+            45 -> WorldClockTileService45::class
+            46 -> WorldClockTileService46::class
+            47 -> WorldClockTileService47::class
+            48 -> WorldClockTileService48::class
+            49 -> WorldClockTileService49::class
+
             else -> throw IllegalArgumentException("Invalid tile id")
         }
 
@@ -244,8 +292,7 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
             val state = getTileClass(tileId).getComponentEnabled(context)
             if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) return true
             // Tile 0 is enabled by default in the manifest
-            if (tileId == 0 && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) return true
-            return false
+            return tileId == 0 && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
         }
 
         @JvmStatic
@@ -254,10 +301,12 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
             getTileClass(tileId).setComponentEnabled(context, enabled)
         }
 
-        const val MAX_TILE_ID = 9
+        const val MAX_TILE_ID = 49
     }
 }
 
+// Unfortunately there's no way to dynamically define tiles.
+// We can however define a lot of them and disable them by default.
 
 class WorldClockTileService0 : WorldClockTileService(0)
 
@@ -278,6 +327,86 @@ class WorldClockTileService7 : WorldClockTileService(7)
 class WorldClockTileService8 : WorldClockTileService(8)
 
 class WorldClockTileService9 : WorldClockTileService(9)
+
+class WorldClockTileService10 : WorldClockTileService(10)
+
+class WorldClockTileService11 : WorldClockTileService(11)
+
+class WorldClockTileService12 : WorldClockTileService(12)
+
+class WorldClockTileService13 : WorldClockTileService(13)
+
+class WorldClockTileService14 : WorldClockTileService(14)
+
+class WorldClockTileService15 : WorldClockTileService(15)
+
+class WorldClockTileService16 : WorldClockTileService(16)
+
+class WorldClockTileService17 : WorldClockTileService(17)
+
+class WorldClockTileService18 : WorldClockTileService(18)
+
+class WorldClockTileService19 : WorldClockTileService(19)
+
+class WorldClockTileService20 : WorldClockTileService(20)
+
+class WorldClockTileService21 : WorldClockTileService(21)
+
+class WorldClockTileService22 : WorldClockTileService(22)
+
+class WorldClockTileService23 : WorldClockTileService(23)
+
+class WorldClockTileService24 : WorldClockTileService(24)
+
+class WorldClockTileService25 : WorldClockTileService(25)
+
+class WorldClockTileService26 : WorldClockTileService(26)
+
+class WorldClockTileService27 : WorldClockTileService(27)
+
+class WorldClockTileService28 : WorldClockTileService(28)
+
+class WorldClockTileService29 : WorldClockTileService(29)
+
+class WorldClockTileService30 : WorldClockTileService(30)
+
+class WorldClockTileService31 : WorldClockTileService(31)
+
+class WorldClockTileService32 : WorldClockTileService(32)
+
+class WorldClockTileService33 : WorldClockTileService(33)
+
+class WorldClockTileService34 : WorldClockTileService(34)
+
+class WorldClockTileService35 : WorldClockTileService(35)
+
+class WorldClockTileService36 : WorldClockTileService(36)
+
+class WorldClockTileService37 : WorldClockTileService(37)
+
+class WorldClockTileService38 : WorldClockTileService(38)
+
+class WorldClockTileService39 : WorldClockTileService(39)
+
+class WorldClockTileService40 : WorldClockTileService(40)
+
+class WorldClockTileService41 : WorldClockTileService(41)
+
+class WorldClockTileService42 : WorldClockTileService(42)
+
+class WorldClockTileService43 : WorldClockTileService(43)
+
+class WorldClockTileService44 : WorldClockTileService(44)
+
+class WorldClockTileService45 : WorldClockTileService(45)
+
+class WorldClockTileService46 : WorldClockTileService(46)
+
+class WorldClockTileService47 : WorldClockTileService(47)
+
+class WorldClockTileService48 : WorldClockTileService(48)
+
+class WorldClockTileService49 : WorldClockTileService(49)
 
 
 @Preview(
@@ -309,11 +438,7 @@ fun EmptyLayoutPreview() {
 fun TimeInRussiaPreview() {
     TilePreview {
         timeLayout(
-            "Moscow, Russia",
-            null,
-            "-2 centuries",
-            true,
-            ColorScheme.Default,
+            "Moscow, Russia", null, "-2 centuries", true, ColorScheme.Default,
             hostileCountries["Russia"] ?: "Be glad you're not cannon fodder"
         ).build()
     }
@@ -331,11 +456,7 @@ fun TimeInRussiaPreview() {
 fun TimeInIranPreview() {
     TilePreview {
         timeLayout(
-            "Tehran, Iran",
-            null,
-            "-2 centuries",
-            true,
-            ColorScheme.Default,
+            "Tehran, Iran", null, "-2 centuries", true, ColorScheme.Default,
             hostileCountries["Iran"] ?: "Be glad they haven't killed you"
         ).build()
     }

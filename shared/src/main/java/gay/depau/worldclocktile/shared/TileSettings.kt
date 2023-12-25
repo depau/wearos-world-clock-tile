@@ -17,6 +17,18 @@ class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNo
     private val listeners = mutableListOf<SettingChangeListener>()
 
     var dbVersion: Int by settings.delegate("dbVersion", -1)
+    private val _modifyVersion: Int by settings.delegate("modifyVersion", 0)
+
+    var modifyVersion: Int
+        get() = _modifyVersion
+        set(value) {
+            // Don't use the delegate here, as it will trigger a refresh
+            settings.edit().apply {
+                putInt("modifyVersion", value)
+                apply()
+            }
+        }
+
     var timezoneId: String? by settings.delegate("tile${tileId}_timezoneId", null)
     var cityName: String? by settings.delegate("tile${tileId}_cityName", null)
     var time24h: Boolean by settings.delegate("tile${tileId}_time24h", false)
@@ -28,6 +40,7 @@ class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNo
     }
 
     override fun notifyListeners() {
+        modifyVersion++
         listeners.forEach { it.refreshSettings(this) }
     }
 

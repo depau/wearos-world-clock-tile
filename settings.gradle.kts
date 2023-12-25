@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "World Clock"
-include ':app'
-include ':tzdb_generator'
+include(":app")
+include(":tzdb_generator")

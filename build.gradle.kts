@@ -1,5 +1,5 @@
 buildscript {
-    extra["compose_version"] = "1.5.7"
+    extra["compose_version"] = "1.5.4"
     extra["wear_compose_version"] = "1.2.1"
 }
 

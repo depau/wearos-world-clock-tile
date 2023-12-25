@@ -70,7 +70,6 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.tiles.TileService
 import androidx.wear.tooling.preview.devices.WearDevices
-import gay.depau.worldclocktile.AppSettings
 import gay.depau.worldclocktile.R
 import gay.depau.worldclocktile.WorldClockTileService
 import gay.depau.worldclocktile.composables.MainView
@@ -83,15 +82,16 @@ import gay.depau.worldclocktile.presentation.theme.toggleChipColors
 import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsState
 import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsViewModel
 import gay.depau.worldclocktile.presentation.views.AboutView
-import gay.depau.worldclocktile.tzdb.TimezoneDatabase
-import gay.depau.worldclocktile.tzdb.populateWithSampleData
-import gay.depau.worldclocktile.utils.ColorScheme
-import gay.depau.worldclocktile.utils.composeColor
-import gay.depau.worldclocktile.utils.currentTimeAt
+import gay.depau.worldclocktile.shared.TileSettings
+import gay.depau.worldclocktile.shared.tzdb.TimezoneDatabase
+import gay.depau.worldclocktile.shared.tzdb.populateWithSampleData
+import gay.depau.worldclocktile.shared.utils.ColorScheme
+import gay.depau.worldclocktile.shared.utils.composeColor
+import gay.depau.worldclocktile.shared.utils.currentTimeAt
+import gay.depau.worldclocktile.shared.utils.reducedPrecision
+import gay.depau.worldclocktile.shared.utils.timezoneOffsetDescription
+import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
 import gay.depau.worldclocktile.utils.foreground
-import gay.depau.worldclocktile.utils.reducedPrecision
-import gay.depau.worldclocktile.utils.timezoneOffsetDescription
-import gay.depau.worldclocktile.utils.timezoneSimpleNames
 import kotlinx.coroutines.delay
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -100,7 +100,7 @@ import kotlin.properties.Delegates
 
 class TileSettingsActivity : ComponentActivity() {
     private val mViewModel: TileSettingsViewModel by viewModels { TileSettingsViewModel.Factory }
-    private lateinit var mSettings: AppSettings
+    private lateinit var mSettings: TileSettings
     private var tileId by Delegates.notNull<Int>()
 
     private fun refreshTile() {
@@ -137,7 +137,7 @@ class TileSettingsActivity : ComponentActivity() {
         }
         refreshTile()
 
-        mSettings = AppSettings(this, tileId).apply {
+        mSettings = TileSettings(this, tileId).apply {
             addListener(mViewModel)
             mViewModel.refreshSettings(this)
         }
@@ -471,7 +471,7 @@ fun MainSettingsView(
 @Composable
 fun ColorSelectionView(setColorScheme: (ColorScheme) -> Unit, selectedColor: ColorScheme) {
     val listState = rememberScalingLazyListState(
-        initialCenterItemIndex = ColorScheme.values().indexOf(selectedColor) + 2
+        initialCenterItemIndex = ColorScheme.entries.indexOf(selectedColor) + 2
     )
     var forceRefresh by remember { mutableStateOf(false) }
     var refreshScrollPosition by remember { mutableStateOf<Int?>(null) }
@@ -509,7 +509,7 @@ fun ColorSelectionView(setColorScheme: (ColorScheme) -> Unit, selectedColor: Col
                     }
                 }
             } else {
-                items(ColorScheme.values(), key = { it.name }) { colorScheme ->
+                items(items = ColorScheme.entries.toTypedArray(), key = { it.name }) { colorScheme ->
                     val isCurrentColor = remember(colorScheme, selectedColor) {
                         colorScheme == selectedColor
                     }

@@ -41,8 +41,8 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
 import androidx.wear.compose.material.dialog.Dialog
 import androidx.wear.tooling.preview.devices.WearDevices
-import gay.depau.worldclocktile.utils.ColorScheme
-import gay.depau.worldclocktile.utils.composeColor
+import gay.depau.worldclocktile.shared.utils.ColorScheme
+import gay.depau.worldclocktile.shared.utils.composeColor
 import gay.depau.worldclocktile.utils.foreground
 
 @Composable

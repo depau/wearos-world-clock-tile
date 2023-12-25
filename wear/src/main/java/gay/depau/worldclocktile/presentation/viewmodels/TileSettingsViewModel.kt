@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
-import gay.depau.worldclocktile.AppSettings
-import gay.depau.worldclocktile.SettingChangeListener
+import gay.depau.worldclocktile.shared.TileSettings
+import gay.depau.worldclocktile.shared.SettingChangeListener
 import gay.depau.worldclocktile.thisApplicaton
-import gay.depau.worldclocktile.tzdb.City
-import gay.depau.worldclocktile.tzdb.CountryNameAndProvincesDenomination
-import gay.depau.worldclocktile.tzdb.TimezoneDao
-import gay.depau.worldclocktile.utils.ColorScheme
+import gay.depau.worldclocktile.shared.tzdb.City
+import gay.depau.worldclocktile.shared.tzdb.CountryNameAndProvincesDenomination
+import gay.depau.worldclocktile.shared.tzdb.TimezoneDao
+import gay.depau.worldclocktile.shared.utils.ColorScheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +50,7 @@ data class DbListResultCache(
 
 class TileSettingsViewModel(
     private val timezoneDao: TimezoneDao,
-) : ViewModel(), SettingChangeListener {
+) : ViewModel(), gay.depau.worldclocktile.shared.SettingChangeListener {
     private val _state = MutableStateFlow(TileSettingsState.Empty)
     val state: StateFlow<TileSettingsState> = _state.asStateFlow()
 
@@ -129,7 +129,7 @@ class TileSettingsViewModel(
     }
 
 
-    override fun refreshSettings(settings: AppSettings) {
+    override fun refreshSettings(settings: gay.depau.worldclocktile.shared.TileSettings) {
         _state.update {
             it.copy(
                 timezoneId = settings.timezoneId,

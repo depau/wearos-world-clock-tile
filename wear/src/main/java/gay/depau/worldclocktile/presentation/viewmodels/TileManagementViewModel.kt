@@ -10,8 +10,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
-import gay.depau.worldclocktile.AppSettings
-import gay.depau.worldclocktile.SettingChangeListener
 import gay.depau.worldclocktile.WorldClockTileService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,15 +25,15 @@ data class TileManagementState(
         get() = (0..WorldClockTileService.MAX_TILE_ID).first { it !in enabledTileIds }
 }
 
-class TileManagementViewModel : ViewModel(), SettingChangeListener {
+class TileManagementViewModel : ViewModel(), gay.depau.worldclocktile.shared.SettingChangeListener {
     private val _state = MutableStateFlow(TileManagementState(emptyList(), emptyMap()))
     val state: StateFlow<TileManagementState> = _state.asStateFlow()
 
-    override fun refreshSettings(settings: AppSettings) {
-        if (settings.tileId == null) return
+    override fun refreshSettings(settings: gay.depau.worldclocktile.shared.TileSettings) {
+        val tileId = settings.tileId ?: return
         _state.update {
             it.copy(
-                tileSettings = it.tileSettings + (settings.tileId to TileSettingsState(
+                tileSettings = it.tileSettings + (tileId to TileSettingsState(
                     settings.timezoneId, settings.cityName, settings.time24h, settings.listOrder, settings.colorScheme
                 ))
             )

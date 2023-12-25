@@ -9,15 +9,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.wear.compose.material.*
+import androidx.wear.compose.material.ChipColors
+import androidx.wear.compose.material.ChipDefaults
+import androidx.wear.compose.material.ToggleChipColors
+import androidx.wear.compose.material.ToggleChipDefaults
 import androidx.wear.compose.material.ToggleChipDefaults.splitToggleChipColors
-import gay.depau.worldclocktile.utils.ColorScheme
-import gay.depau.worldclocktile.utils.composeColor
+import gay.depau.worldclocktile.shared.utils.ColorScheme
+import gay.depau.worldclocktile.shared.utils.composeColor
 import gay.depau.worldclocktile.utils.foreground
 
 @Composable
 fun chipGradientColors(
-    checked: Boolean, flip: Boolean = false, colorScheme: ColorScheme
+    checked: Boolean, flip: Boolean = false, colorScheme: ColorScheme,
 ): ChipColors {
     val context = LocalContext.current
     val themeColor = remember { colorScheme.getColor(context).composeColor }
@@ -38,15 +41,14 @@ fun chipGradientColors(
         ChipDefaults.chipColors(
             backgroundColor = themeColor.copy(alpha = 0.5f),
             disabledBackgroundColor = themeColor.copy(alpha = 0.5f).copy(alpha = 0.6f),
-            contentColor = themeColor.foreground,
-            disabledContentColor = themeColor.foreground.copy(alpha = 0.6f)
+            contentColor = themeColor.foreground, disabledContentColor = themeColor.foreground.copy(alpha = 0.6f)
         )
     }
 }
 
 @Composable
 fun toggleChipColors(
-    colorScheme: ColorScheme
+    colorScheme: ColorScheme,
 ): ToggleChipColors {
     val context = LocalContext.current
     val themeColor by remember { derivedStateOf { colorScheme.getColor(context).composeColor } }
@@ -74,7 +76,7 @@ fun themedChipColors(
     disabledContentColor: Color? = null,
     disabledSecondaryContentColor: Color? = null,
     disabledIconColor: Color? = null,
-    getColorScheme: () -> ColorScheme
+    getColorScheme: () -> ColorScheme,
 ): ChipColors {
     val context = LocalContext.current
     val colorScheme = getColorScheme()

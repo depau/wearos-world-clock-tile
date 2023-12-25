@@ -40,11 +40,12 @@ import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.tiles.SuspendingTileService
 import gay.depau.worldclocktile.composables.TilePreview
 import gay.depau.worldclocktile.presentation.TileSettingsActivity
-import gay.depau.worldclocktile.utils.ColorScheme
-import gay.depau.worldclocktile.utils.currentTimeAt
-import gay.depau.worldclocktile.utils.getComponentEnabled
-import gay.depau.worldclocktile.utils.setComponentEnabled
-import gay.depau.worldclocktile.utils.timezoneOffsetDescription
+import gay.depau.worldclocktile.shared.utils.ColorScheme
+import gay.depau.worldclocktile.shared.utils.currentTimeAt
+import gay.depau.worldclocktile.shared.utils.getComponentEnabled
+import gay.depau.worldclocktile.shared.utils.setComponentEnabled
+import gay.depau.worldclocktile.shared.utils.timezoneOffsetDescription
+import gay.depau.worldclocktile.utils.getColorProp
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
@@ -145,11 +146,11 @@ fun Context.timeLayout(
 
 @OptIn(ExperimentalHorologistApi::class)
 abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileService() {
-    private lateinit var mSettings: AppSettings
+    private lateinit var mSettings: gay.depau.worldclocktile.shared.TileSettings
 
     override fun onCreate() {
         super.onCreate()
-        mSettings = AppSettings(this, tileId)
+        mSettings = gay.depau.worldclocktile.shared.TileSettings(this, tileId)
     }
 
     override suspend fun tileRequest(requestParams: RequestBuilders.TileRequest): Tile {

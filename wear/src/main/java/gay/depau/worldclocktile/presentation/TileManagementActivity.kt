@@ -50,7 +50,6 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.tiles.TileService.EXTRA_CLICKABLE_ID
 import androidx.wear.tooling.preview.devices.WearDevices
-import gay.depau.worldclocktile.AppSettings
 import gay.depau.worldclocktile.R
 import gay.depau.worldclocktile.WorldClockTileService
 import gay.depau.worldclocktile.composables.MainView
@@ -62,16 +61,17 @@ import gay.depau.worldclocktile.presentation.viewmodels.TileManagementState
 import gay.depau.worldclocktile.presentation.viewmodels.TileManagementViewModel
 import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsState
 import gay.depau.worldclocktile.presentation.views.AboutView
-import gay.depau.worldclocktile.utils.ColorScheme
-import gay.depau.worldclocktile.utils.currentTimeAt
-import gay.depau.worldclocktile.utils.timezoneSimpleNames
+import gay.depau.worldclocktile.shared.TileSettings
+import gay.depau.worldclocktile.shared.utils.ColorScheme
+import gay.depau.worldclocktile.shared.utils.currentTimeAt
+import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 
 
 class TileManagementActivity : ComponentActivity() {
     private val mViewModel: TileManagementViewModel by viewModels()
-    private lateinit var mSettings: Map<Int, AppSettings>
+    private lateinit var mSettings: Map<Int, TileSettings>
 
     private fun openTileSettingsActivity(id: Int) {
         startActivity(Intent(this, TileSettingsActivity::class.java).apply {
@@ -102,9 +102,9 @@ class TileManagementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val settings = mutableMapOf<Int, AppSettings>()
+        val settings = mutableMapOf<Int, TileSettings>()
         for (i in 0..WorldClockTileService.MAX_TILE_ID) {
-            settings[i] = AppSettings(this, i).apply {
+            settings[i] = TileSettings(this, i).apply {
                 addListener(mViewModel)
                 mViewModel.refreshSettings(this)
             }

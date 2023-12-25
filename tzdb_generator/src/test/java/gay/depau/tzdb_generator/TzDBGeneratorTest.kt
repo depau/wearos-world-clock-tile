@@ -9,10 +9,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
-import gay.depau.worldclocktile.tzdb.City
-import gay.depau.worldclocktile.tzdb.TimezoneDatabase
-import gay.depau.worldclocktile.utils.iterator
-import gay.depau.worldclocktile.utils.timezoneSimpleNames
+import gay.depau.worldclocktile.shared.tzdb.City
+import gay.depau.worldclocktile.shared.tzdb.TimezoneDatabase
+import gay.depau.worldclocktile.shared.utils.iterator
+import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test

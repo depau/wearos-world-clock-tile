@@ -28,7 +28,6 @@ android {
         }
     }
 
-
     buildFeatures {
         compose = true
         viewBinding = true
@@ -77,7 +76,9 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.wear:wear-remote-interactions:1.0.0")
     implementation("androidx.compose.animation:animation-graphics:1.5.4")
+    implementation(project(":shared"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
 
     debugImplementation("androidx.compose.ui:ui-tooling-preview:1.5.4")
     debugImplementation("androidx.wear:wear-tooling-preview:1.0.0")
@@ -85,7 +86,6 @@ dependencies {
 
     // DB
     implementation("androidx.room:room-ktx:2.6.1")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")

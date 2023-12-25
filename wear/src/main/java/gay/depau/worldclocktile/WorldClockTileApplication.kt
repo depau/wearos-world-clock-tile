@@ -5,11 +5,11 @@ package gay.depau.worldclocktile
 
 import android.app.Application
 import android.content.Context
-import gay.depau.worldclocktile.tzdb.TimezoneDatabase
+import gay.depau.worldclocktile.shared.tzdb.TimezoneDatabase
 
 class WorldClockTileApplication : Application() {
     val database: TimezoneDatabase by lazy {
-        TimezoneDatabase.getInstance(this)
+        TimezoneDatabase.getInstance(this, BuildConfig.VERSION_CODE)
     }
 }
 

@@ -111,4 +111,4 @@ gradle-app.setting
 
 # Ignore database files, except for the timezone DB
 *.db
-!app/src/main/assets/tzdb.db
+!shared/src/main/assets/tzdb.db

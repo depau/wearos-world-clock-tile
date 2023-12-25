@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 rootProject.name = "World Clock"
 include(":wear")
 include(":tzdb_generator")
+include(":mobile")
+include(":shared")

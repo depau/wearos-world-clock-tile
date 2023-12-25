@@ -11,14 +11,33 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -31,7 +50,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,18 +58,21 @@ import androidx.wear.compose.foundation.lazy.AutoCenteringParams
 import androidx.wear.compose.foundation.lazy.ScalingLazyListAnchorType
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
-import androidx.wear.compose.material.*
+import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Switch
 import androidx.wear.compose.material.SwitchDefaults
 import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.ToggleChip
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.tiles.TileService
-import gay.depau.worldclocktile.*
+import androidx.wear.tooling.preview.devices.WearDevices
+import gay.depau.worldclocktile.AppSettings
 import gay.depau.worldclocktile.R
+import gay.depau.worldclocktile.WorldClockTileService
 import gay.depau.worldclocktile.composables.MainView
 import gay.depau.worldclocktile.composables.ScalingLazyColumnWithRSB
 import gay.depau.worldclocktile.composables.TextInputDialog
@@ -64,11 +85,17 @@ import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsViewModel
 import gay.depau.worldclocktile.presentation.views.AboutView
 import gay.depau.worldclocktile.tzdb.TimezoneDatabase
 import gay.depau.worldclocktile.tzdb.populateWithSampleData
-import gay.depau.worldclocktile.utils.*
 import gay.depau.worldclocktile.utils.ColorScheme
+import gay.depau.worldclocktile.utils.composeColor
+import gay.depau.worldclocktile.utils.currentTimeAt
+import gay.depau.worldclocktile.utils.foreground
+import gay.depau.worldclocktile.utils.reducedPrecision
+import gay.depau.worldclocktile.utils.timezoneOffsetDescription
+import gay.depau.worldclocktile.utils.timezoneSimpleNames
 import kotlinx.coroutines.delay
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.properties.Delegates
 
 class TileSettingsActivity : ComponentActivity() {
@@ -121,23 +148,17 @@ class TileSettingsActivity : ComponentActivity() {
             var queryStartTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
             SwipeDismissableNavHost(
-                modifier = Modifier.fillMaxSize(),
-                navController = navController,
-                startDestination = "main"
+                modifier = Modifier.fillMaxSize(), navController = navController, startDestination = "main"
             ) {
                 composable("main") {
-                    MainSettingsView(mViewModel,
-                        set24Hour = {
-                            mSettings.time24h = it
-                            refreshTile()
-                        },
-                        openColorSelection = { navController.navigate("select_color") },
-                        openTimeZoneSelection = {
-                            mViewModel.resetDbCache()
-                            navController.navigate("select_continent")
-                            queryStartTime = System.currentTimeMillis()
-                        },
-                        openAbout = { navController.navigate("about") },
+                    MainSettingsView(mViewModel, set24Hour = {
+                        mSettings.time24h = it
+                        refreshTile()
+                    }, openColorSelection = { navController.navigate("select_color") }, openTimeZoneSelection = {
+                        mViewModel.resetDbCache()
+                        navController.navigate("select_continent")
+                        queryStartTime = System.currentTimeMillis()
+                    }, openAbout = { navController.navigate("about") },
                         openTileManagement = { goToManagementActivityAndClose() },
                         renameCity = { mSettings.cityName = it })
                 }
@@ -150,20 +171,16 @@ class TileSettingsActivity : ComponentActivity() {
                     )
                 }
                 composable("select_continent") {
-                    ContinentSelectionView(
-                        viewModel = mViewModel,
+                    ContinentSelectionView(viewModel = mViewModel,
                         openStdTimeZoneSelection = { navController.navigate("select_std_timezone") },
                         selectContinent = {
                             mViewModel.selectContinent(it)
                             navController.navigate("select_country")
-                        },
-                        openSearch = { navController.navigate("search") },
-                        queryStartTime = queryStartTime
+                        }, openSearch = { navController.navigate("search") }, queryStartTime = queryStartTime
                     )
                 }
                 composable("search") {
-                    SearchView(viewModel = mViewModel,
-                        queryStartTime = queryStartTime,
+                    SearchView(viewModel = mViewModel, queryStartTime = queryStartTime,
                         setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
                             mSettings.cityName = city
@@ -184,49 +201,39 @@ class TileSettingsActivity : ComponentActivity() {
                     )
                 }
                 composable("select_country") {
-                    CountrySelectionView(
-                        viewModel = mViewModel,
-                        continent = state.selectedContinent,
+                    CountrySelectionView(viewModel = mViewModel, continent = state.selectedContinent,
                         openProvinces = { country, denomination ->
                             mViewModel.selectCountry(
                                 country, provincesDenomination = denomination
                             )
                             navController.navigate("select_province")
-                        },
-                        openCities = { country, province ->
+                        }, openCities = { country, province ->
                             mViewModel.selectCountry(
                                 country, province = province
                             )
                             navController.navigate("select_city")
-                        },
-                        queryStartTime = queryStartTime
+                        }, queryStartTime = queryStartTime
                     )
                 }
                 composable("select_province") {
                     ProvinceSelectionView(
-                        viewModel = mViewModel,
-                        country = state.selectedCountry,
-                        provincesDenomination = state.provincesDenomination,
-                        openCities = { country, province ->
+                        viewModel = mViewModel, country = state.selectedCountry,
+                        provincesDenomination = state.provincesDenomination, openCities = { country, province ->
                             mViewModel.selectProvince(country, province)
                             navController.navigate("select_city")
-                        },
-                        queryStartTime = queryStartTime
+                        }, queryStartTime = queryStartTime
                     )
                 }
                 composable("select_city") {
                     CitySelectionView(
-                        viewModel = mViewModel,
-                        country = state.selectedCountry,
-                        province = state.selectedProvince,
+                        viewModel = mViewModel, country = state.selectedCountry, province = state.selectedProvince,
                         setTimezoneIDCity = { timezoneId, city ->
                             mSettings.timezoneId = timezoneId
                             mSettings.cityName = city
                             mViewModel.resetDbCache()
                             refreshTile()
                             navController.popBackStack("main", false)
-                        },
-                        queryStartTime = queryStartTime
+                        }, queryStartTime = queryStartTime
                     )
                 }
                 composable("about") {
@@ -259,9 +266,7 @@ fun ColorIcon(
     Icon(
         modifier = modifier.border(
             3.dp, shape = CircleShape, color = iconBorderColor.foreground
-        ),
-        imageVector = ImageVector.vectorResource(R.drawable.color_preview),
-        contentDescription = "Color: $colorName",
+        ), imageVector = ImageVector.vectorResource(R.drawable.color_preview), contentDescription = "Color: $colorName",
         tint = iconColor
     )
 }
@@ -284,16 +289,12 @@ fun TilePreviewModule(viewModel: TileSettingsViewModel) {
     }
 
     return Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = state.cityName ?: "Current location",
-            color = colorLight,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            modifier = Modifier.padding(horizontal = 16.dp), text = state.cityName ?: "Current location",
+            color = colorLight, maxLines = 1, overflow = TextOverflow.Ellipsis
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -357,13 +358,11 @@ fun MainSettingsView(
             item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
             item("caret") {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_caret_down),
-                        contentDescription = "Caret",
-                        tint = MaterialTheme.colors.onSurface
+                        contentDescription = "Caret", tint = MaterialTheme.colors.onSurface
                     )
                 }
             }
@@ -371,80 +370,55 @@ fun MainSettingsView(
             item("heading") { Text("Settings") }
             item("spacer3") { Spacer(modifier = Modifier) }
             item("nameButton") {
-                Chip(modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Name") },
-                    secondaryLabel = {
-                        Text(
-                            text = state.cityName ?: "[not set]",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    onClick = { showRenameDialog = true },
-                    colors = themedChipColors { state.colorScheme },
-                    icon = {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_label),
-                            contentDescription = "Name"
-                        )
-                    })
+                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Name") }, secondaryLabel = {
+                    Text(
+                        text = state.cityName ?: "[not set]", maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                }, onClick = { showRenameDialog = true }, colors = themedChipColors { state.colorScheme }, icon = {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_label), contentDescription = "Name"
+                    )
+                })
             }
             item("timezoneButton") {
-                Chip(modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Time zone") },
-                    secondaryLabel = {
-                        if (state.timezoneId != null) Text(
-                            timezoneSimpleNames[state.timezoneId] ?: state.timezoneId!!,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    onClick = openTimeZoneSelection,
-                    colors = themedChipColors { state.colorScheme },
-                    icon = {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_world),
-                            contentDescription = "Time zone"
-                        )
-                    })
+                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Time zone") }, secondaryLabel = {
+                    if (state.timezoneId != null) Text(
+                        timezoneSimpleNames[state.timezoneId] ?: state.timezoneId!!, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }, onClick = openTimeZoneSelection, colors = themedChipColors { state.colorScheme }, icon = {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_world), contentDescription = "Time zone"
+                    )
+                })
             }
             item("colorButton") {
-                Chip(modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Color") },
-                    secondaryLabel = {
-                        val context = LocalContext.current
-                        val colorName by remember {
-                            derivedStateOf {
-                                state.colorScheme.getName(
-                                    context
-                                )
-                            }
+                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Color") }, secondaryLabel = {
+                    val context = LocalContext.current
+                    val colorName by remember {
+                        derivedStateOf {
+                            state.colorScheme.getName(
+                                context
+                            )
                         }
+                    }
 
-                        Text(colorName)
-                    },
-                    onClick = openColorSelection,
-                    colors = themedChipColors { state.colorScheme },
-                    icon = {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_palette),
-                            contentDescription = "Color"
-                        )
-                    })
+                    Text(colorName)
+                }, onClick = openColorSelection, colors = themedChipColors { state.colorScheme }, icon = {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_palette), contentDescription = "Color"
+                    )
+                })
             }
 
             item("24hourButton") {
                 val context = LocalContext.current
                 val themeColor by remember { derivedStateOf { state.colorScheme.getColor(context).composeColor } }
-                ToggleChip(modifier = Modifier.fillMaxWidth(),
-                    checked = state.time24h,
-                    onCheckedChange = { set24Hour(it) },
-                    label = { Text("24 hour time") },
-                    colors = toggleChipColors(colorScheme = state.colorScheme),
-                    toggleControl = {
+                ToggleChip(modifier = Modifier.fillMaxWidth(), checked = state.time24h,
+                    onCheckedChange = { set24Hour(it) }, label = { Text("24 hour time") },
+                    colors = toggleChipColors(colorScheme = state.colorScheme), toggleControl = {
                         Switch(
-                            checked = state.time24h,
-                            onCheckedChange = { set24Hour(it) },
+                            checked = state.time24h, onCheckedChange = { set24Hour(it) },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = themeColor.foreground.copy(alpha = 0.5f),
                                 uncheckedThumbColor = themeColor.foreground.copy(alpha = 0.5f),
@@ -458,11 +432,8 @@ fun MainSettingsView(
             item("spacer4") { Spacer(modifier = Modifier.height(8.dp)) }
 
             item("manageTilesButton") {
-                Chip(modifier = Modifier.fillMaxWidth(),
-                    label = { Text("All cities…") },
-                    onClick = openTileManagement,
-                    colors = themedChipColors { state.colorScheme },
-                    icon = {
+                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("All cities…") }, onClick = openTileManagement,
+                    colors = themedChipColors { state.colorScheme }, icon = {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_globe),
                             contentDescription = "View all cities"
@@ -487,20 +458,13 @@ fun MainSettingsView(
         }
     }
 
-    TextInputDialog(
-        showDialog = showRenameDialog,
-        title = { Text("Set city name") },
-        inputLabel = "Name",
-        initialValue = { state.cityName ?: "" },
-        keyboardOptions = KeyboardOptions(
+    TextInputDialog(showDialog = showRenameDialog, title = { Text("Set city name") }, inputLabel = "Name",
+        initialValue = { state.cityName ?: "" }, keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-        ),
-        onSubmit = { name ->
+        ), onSubmit = { name ->
             renameCity(name)
             showRenameDialog = false
-        },
-        dismissDialog = { showRenameDialog = false },
-        colorScheme = state.colorScheme
+        }, dismissDialog = { showRenameDialog = false }, colorScheme = state.colorScheme
     )
 }
 
@@ -551,17 +515,14 @@ fun ColorSelectionView(setColorScheme: (ColorScheme) -> Unit, selectedColor: Col
                     }
 
                     Chip(modifier = Modifier.fillMaxWidth(),
-                        label = { Text(colorScheme.getName(LocalContext.current)) },
-                        onClick = {
+                        label = { Text(colorScheme.getName(LocalContext.current)) }, onClick = {
                             setColorScheme(colorScheme)
                             forceRefresh = true
                             println(listState.centerItemIndex)
                             refreshScrollPosition = listState.centerItemIndex
-                        },
-                        colors = chipGradientColors(
+                        }, colors = chipGradientColors(
                             checked = isCurrentColor, colorScheme = selectedColor
-                        ),
-                        icon = {
+                        ), icon = {
                             ColorIcon(
                                 modifier = Modifier.size(20.dp), colorScheme, selectedColor
                             )
@@ -578,14 +539,13 @@ fun ContinentSelectionView(
     openStdTimeZoneSelection: () -> Unit,
     openSearch: () -> Unit,
     selectContinent: (String) -> Unit,
-    queryStartTime: Long = 0L
+    queryStartTime: Long = 0L,
 ) {
     val listState = rememberForeverScalingLazyListState(
         key = "continentSelection", params = queryStartTime, initialCenterItemIndex = 0
     )
     val state by viewModel.state.collectAsState()
-    val continents by viewModel.getContinents()
-        .collectAsState(initial = viewModel.getContinentsCache())
+    val continents by viewModel.getContinents().collectAsState(initial = viewModel.getContinentsCache())
 
     LaunchedEffect(continents) {
         viewModel.cacheContinents(continents)
@@ -603,11 +563,8 @@ fun ContinentSelectionView(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item("searchButton") {
-                Chip(modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Search") },
-                    onClick = { openSearch() },
-                    colors = themedChipColors { state.colorScheme },
-                    icon = {
+                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Search") }, onClick = { openSearch() },
+                    colors = themedChipColors { state.colorScheme }, icon = {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_world_search),
                             contentDescription = "Search"
@@ -615,11 +572,8 @@ fun ContinentSelectionView(
                     })
             }
             item("stdTimezoneButton") {
-                Chip(modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Standard time zones") },
-                    onClick = { openStdTimeZoneSelection() },
-                    colors = themedChipColors { state.colorScheme },
-                    icon = {
+                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Standard time zones") },
+                    onClick = { openStdTimeZoneSelection() }, colors = themedChipColors { state.colorScheme }, icon = {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_world),
                             contentDescription = "Standard timezones"
@@ -645,7 +599,7 @@ fun ContinentSelectionView(
 fun StdTimezoneSelectionView(
     viewModel: TileSettingsViewModel,
     queryStartTime: Long = 0L,
-    setTimezoneIDCity: (String, String) -> Unit
+    setTimezoneIDCity: (String, String) -> Unit,
 ) {
     val listState = rememberForeverScalingLazyListState("stdTimezoneSelection", queryStartTime)
     val state by viewModel.state.collectAsState()
@@ -705,13 +659,14 @@ fun CountrySelectionView(
     continent: String,
     openProvinces: (String, String) -> Unit,
     openCities: (String, String) -> Unit,
-    queryStartTime: Long = 0L
+    queryStartTime: Long = 0L,
 ) {
     val listState = rememberForeverScalingLazyListState(
         key = "countrySelection", params = queryStartTime
     )
     val state by viewModel.state.collectAsState()
-    val countries by viewModel.getCountriesInContinent(continent)
+    val countries by viewModel
+        .getCountriesInContinent(continent)
         .collectAsState(initial = viewModel.getCountriesCache(continent))
     LaunchedEffect(countries) {
         viewModel.cacheCountries(countries, continent)
@@ -755,13 +710,14 @@ fun ProvinceSelectionView(
     country: String,
     provincesDenomination: String,
     queryStartTime: Long = 0L,
-    openCities: (String, String) -> Unit
+    openCities: (String, String) -> Unit,
 ) {
     val listState = rememberForeverScalingLazyListState(
         key = "provinceSelection", params = queryStartTime
     )
     val state by viewModel.state.collectAsState()
-    val provinces by viewModel.getProvincesInCountry(country)
+    val provinces by viewModel
+        .getProvincesInCountry(country)
         .collectAsState(initial = viewModel.getProvincesCache(country))
     LaunchedEffect(provinces) {
         viewModel.cacheProvinces(provinces, country)
@@ -780,8 +736,7 @@ fun ProvinceSelectionView(
         ) {
             item("heading") {
                 @Suppress("DEPRECATION") Text(
-                    "${provincesDenomination.capitalize(Locale.ENGLISH)} in $country",
-                    textAlign = TextAlign.Center
+                    "${provincesDenomination.capitalize(Locale.ENGLISH)} in $country", textAlign = TextAlign.Center
                 )
             }
             item("spacer") { Spacer(modifier = Modifier) }
@@ -804,13 +759,14 @@ fun CitySelectionView(
     country: String,
     province: String,
     queryStartTime: Long = 0L,
-    setTimezoneIDCity: (String, String) -> Unit
+    setTimezoneIDCity: (String, String) -> Unit,
 ) {
     val listState = rememberForeverScalingLazyListState(
         key = "citySelection", params = queryStartTime
     )
     val state by viewModel.state.collectAsState()
-    val cities by viewModel.getCitiesInProvince(country, province)
+    val cities by viewModel
+        .getCitiesInProvince(country, province)
         .collectAsState(initial = viewModel.getCitiesCache(country, province))
     LaunchedEffect(cities) {
         viewModel.cacheCities(cities, country, province)
@@ -850,9 +806,7 @@ fun CitySelectionView(
                     },
                     secondaryLabel = {
                         Text(
-                            "${localTimeStr}, ${it.timezoneName}",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            "${localTimeStr}, ${it.timezoneName}", maxLines = 1, overflow = TextOverflow.Ellipsis
                         )
                     },
                     onClick = { setTimezoneIDCity(it.timezone, it.cityName) },
@@ -906,14 +860,15 @@ fun SearchView(
                     modifier = Modifier
                         .padding(16.dp, 8.dp)
                         .fillMaxWidth(),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = themeColor,
                         cursorColor = themeColor,
                         selectionColors = TextSelectionColors(
                             backgroundColor = themeColor.copy(alpha = 0.3f),
                             handleColor = themeColor,
                         ),
-                        textColor = MaterialTheme.colors.onSurface,
+                        focusedTextColor = MaterialTheme.colors.onSurface,
+                        unfocusedTextColor = MaterialTheme.colors.onSurface,
                     ),
                 )
             }
@@ -936,9 +891,7 @@ fun SearchView(
                     },
                     secondaryLabel = {
                         Text(
-                            "${localTimeStr}, ${it.timezoneName}",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            "${localTimeStr}, ${it.timezoneName}", maxLines = 1, overflow = TextOverflow.Ellipsis
                         )
                     },
                     onClick = { setTimezoneIDCity(it.timezone, it.cityName) },
@@ -950,24 +903,20 @@ fun SearchView(
 }
 
 fun previewViewModel(context: Context): TileSettingsViewModel {
-    val db =
-        Room.inMemoryDatabaseBuilder(context, TimezoneDatabase::class.java).allowMainThreadQueries()
-            .build()
+    val db = Room.inMemoryDatabaseBuilder(context, TimezoneDatabase::class.java).allowMainThreadQueries().build()
     val dao = db.getTimezoneDao()
     populateWithSampleData(dao)
     return TileSettingsViewModel(dao).apply {
         setState(
             TileSettingsState(
-                cityName = "Manila, Philippines",
-                colorScheme = ColorScheme.Default,
-                time24h = false,
+                cityName = "Manila, Philippines", colorScheme = ColorScheme.Default, time24h = false,
                 timezoneId = "Asia/Manila"
             )
         )
     }
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun MainSettingsPreview() {
     val context = LocalContext.current
@@ -981,7 +930,7 @@ fun MainSettingsPreview() {
     })
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun ColorSelectionPreview() {
     var colorScheme by remember { mutableStateOf(ColorScheme.Default) }
@@ -989,7 +938,7 @@ fun ColorSelectionPreview() {
 }
 
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun ContinentSelectionPreview() {
     val context = LocalContext.current
@@ -997,7 +946,7 @@ fun ContinentSelectionPreview() {
     ContinentSelectionView(viewModel, {}, {}, {})
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun StdTimezoneSelectionPreview() {
     val context = LocalContext.current
@@ -1005,7 +954,7 @@ fun StdTimezoneSelectionPreview() {
     StdTimezoneSelectionView(viewModel) { _, _ -> }
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun CountrySelectionPreview() {
     val context = LocalContext.current
@@ -1013,7 +962,7 @@ fun CountrySelectionPreview() {
     CountrySelectionView(viewModel, "Asia", { _, _ -> }, { _, _ -> })
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun ProvinceSelectionPreview() {
     val context = LocalContext.current
@@ -1021,7 +970,7 @@ fun ProvinceSelectionPreview() {
     ProvinceSelectionView(viewModel, "Philippines", "regions") { _, _ -> }
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun CitySelectionPreview() {
     val context = LocalContext.current
@@ -1029,7 +978,7 @@ fun CitySelectionPreview() {
     CitySelectionView(viewModel, "Philippines", "Metro Manila") { _, _ -> }
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun SearchResultsSelectPreview() {
     val context = LocalContext.current

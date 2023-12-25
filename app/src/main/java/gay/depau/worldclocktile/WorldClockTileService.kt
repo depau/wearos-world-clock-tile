@@ -6,29 +6,48 @@ package gay.depau.worldclocktile
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.wear.tiles.ActionBuilders.AndroidActivity
-import androidx.wear.tiles.ActionBuilders.LaunchAction
-import androidx.wear.tiles.ColorBuilders
-import androidx.wear.tiles.DimensionBuilders
-import androidx.wear.tiles.DimensionBuilders.dp
-import androidx.wear.tiles.DimensionBuilders.sp
-import androidx.wear.tiles.LayoutElementBuilders.*
-import androidx.wear.tiles.ModifiersBuilders.*
+import androidx.wear.protolayout.ActionBuilders.AndroidActivity
+import androidx.wear.protolayout.ActionBuilders.LaunchAction
+import androidx.wear.protolayout.ColorBuilders
+import androidx.wear.protolayout.DimensionBuilders
+import androidx.wear.protolayout.DimensionBuilders.dp
+import androidx.wear.protolayout.DimensionBuilders.sp
+import androidx.wear.protolayout.LayoutElementBuilders.Box
+import androidx.wear.protolayout.LayoutElementBuilders.Column
+import androidx.wear.protolayout.LayoutElementBuilders.FONT_WEIGHT_BOLD
+import androidx.wear.protolayout.LayoutElementBuilders.FontStyle
+import androidx.wear.protolayout.LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER
+import androidx.wear.protolayout.LayoutElementBuilders.Layout
+import androidx.wear.protolayout.LayoutElementBuilders.SpanText
+import androidx.wear.protolayout.LayoutElementBuilders.Spannable
+import androidx.wear.protolayout.LayoutElementBuilders.TEXT_OVERFLOW_ELLIPSIZE_END
+import androidx.wear.protolayout.LayoutElementBuilders.Text
+import androidx.wear.protolayout.LayoutElementBuilders.TextOverflowProp
+import androidx.wear.protolayout.LayoutElementBuilders.VERTICAL_ALIGN_CENTER
+import androidx.wear.protolayout.ModifiersBuilders.Clickable
+import androidx.wear.protolayout.ModifiersBuilders.Modifiers
+import androidx.wear.protolayout.ModifiersBuilders.Padding
+import androidx.wear.protolayout.ResourceBuilders
+import androidx.wear.protolayout.TimelineBuilders.TimeInterval
+import androidx.wear.protolayout.TimelineBuilders.Timeline
+import androidx.wear.protolayout.TimelineBuilders.TimelineEntry
 import androidx.wear.tiles.RequestBuilders
 import androidx.wear.tiles.RequestBuilders.ResourcesRequest
-import androidx.wear.tiles.ResourceBuilders.Resources
 import androidx.wear.tiles.TileBuilders.Tile
-import androidx.wear.tiles.TimelineBuilders.*
-import com.google.android.horologist.tiles.ExperimentalHorologistTilesApi
+import androidx.wear.tooling.preview.devices.WearDevices
+import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.tiles.SuspendingTileService
 import gay.depau.worldclocktile.composables.TilePreview
 import gay.depau.worldclocktile.presentation.TileSettingsActivity
-import gay.depau.worldclocktile.utils.*
+import gay.depau.worldclocktile.utils.ColorScheme
+import gay.depau.worldclocktile.utils.currentTimeAt
+import gay.depau.worldclocktile.utils.getComponentEnabled
+import gay.depau.worldclocktile.utils.setComponentEnabled
+import gay.depau.worldclocktile.utils.timezoneOffsetDescription
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.TimeZone
 
 
 private const val RESOURCES_VERSION = "1"
@@ -49,20 +68,20 @@ fun Context.timeLayout(
     offset: String,
     view24h: Boolean,
     colorScheme: ColorScheme,
-    hostileText: String? = null
+    hostileText: String? = null,
 ): Box.Builder {
     val amPmString = if (time == null) " __" else if (time.hour < 12) " AM" else " PM"
     val timeString = if (view24h) time?.format(DateTimeFormatter.ofPattern("H:mm")) ?: "__:__"
     else time?.format(DateTimeFormatter.ofPattern("h:mm")) ?: "__:__"
 
     val timeColor =
-        ColorBuilders.ColorProp.Builder().setArgb(colorScheme.getColor(this).toArgb().run {
+        ColorBuilders.ColorProp.Builder(colorScheme.getColor(this).toArgb().run {
             if (time != null || hostileText != null) this
             else this and 0x00FFFFFF or 0x44000000
         }).build()
 
     val otherColor =
-        ColorBuilders.ColorProp.Builder().setArgb(colorScheme.getColorLight(this).toArgb().run {
+        ColorBuilders.ColorProp.Builder(colorScheme.getColorLight(this).toArgb().run {
             if (time != null || hostileText != null) this
             else this and 0x00FFFFFF or 0x77000000
         }).build()
@@ -72,14 +91,14 @@ fun Context.timeLayout(
             Column.Builder().setHorizontalAlignment(HORIZONTAL_ALIGN_CENTER)
                 .setWidth(DimensionBuilders.expand()).addContent(
                     Text.Builder().setMaxLines(1).setModifiers(
-                            Modifiers.Builder().setPadding(
-                                    Padding.Builder().setStart(dp(16F)).setEnd(dp(16F)).build()
-                                ).build()
-                        ).setFontStyle(
-                            FontStyle.Builder().setColor(otherColor).build()
-                        ).setOverflow(
-                            TextOverflowProp.Builder().setValue(TEXT_OVERFLOW_ELLIPSIZE_END).build()
-                        ).setText(cityName).build()
+                        Modifiers.Builder().setPadding(
+                            Padding.Builder().setStart(dp(16F)).setEnd(dp(16F)).build()
+                        ).build()
+                    ).setFontStyle(
+                        FontStyle.Builder().setColor(otherColor).build()
+                    ).setOverflow(
+                        TextOverflowProp.Builder().setValue(TEXT_OVERFLOW_ELLIPSIZE_END).build()
+                    ).setText(cityName).build()
                 ).addContent(
                     if (hostileText == null) {
                         Spannable.Builder().addSpan(
@@ -96,13 +115,13 @@ fun Context.timeLayout(
                         }.build()
                     } else {
                         Text.Builder().setText(hostileText).setMaxLines(3).setModifiers(
-                                Modifiers.Builder().setPadding(
-                                        Padding.Builder().setAll(dp(8F)).build()
-                                    ).build()
-                            ).setFontStyle(
-                                FontStyle.Builder().setColor(colorScheme.getColorProp(this))
-                                    .setSize(sp(24f)).build()
+                            Modifiers.Builder().setPadding(
+                                Padding.Builder().setAll(dp(8F)).build()
                             ).build()
+                        ).setFontStyle(
+                            FontStyle.Builder().setColor(colorScheme.getColorProp(this))
+                                .setSize(sp(24f)).build()
+                        ).build()
                     }
                 ).addContent(
                     Text.Builder().setFontStyle(
@@ -113,7 +132,7 @@ fun Context.timeLayout(
 }
 
 
-@OptIn(ExperimentalHorologistTilesApi::class)
+@OptIn(ExperimentalHorologistApi::class)
 abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileService() {
     private lateinit var mSettings: AppSettings
 
@@ -134,17 +153,17 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
         }
 
         val modifiers = Modifiers.Builder().setClickable(
-                Clickable.Builder().setId("tile${tileId}").setOnClick(
-                        LaunchAction.Builder().setAndroidActivity(
-                                AndroidActivity.Builder()
-                                    .setClassName(TileSettingsActivity::class.java.name)
-                                    .setPackageName(packageName).build()
-                            ).build()
-                    ).build()
+            Clickable.Builder().setId("tile${tileId}").setOnClick(
+                LaunchAction.Builder().setAndroidActivity(
+                    AndroidActivity.Builder()
+                        .setClassName(TileSettingsActivity::class.java.name)
+                        .setPackageName(packageName).build()
+                ).build()
             ).build()
+        ).build()
 
         return Tile.Builder().setResourcesVersion(RESOURCES_VERSION)
-            .setFreshnessIntervalMillis((PRERENDER_MINUTES - 1) * 60 * 1000L).setTimeline(
+            .setFreshnessIntervalMillis((PRERENDER_MINUTES - 1) * 60 * 1000L).setTileTimeline(
                 Timeline.Builder().addTimelineEntry(
                     TimelineEntry.Builder().setLayout(
                         Layout.Builder().setRoot(
@@ -194,8 +213,8 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
             .build()
     }
 
-    override suspend fun resourcesRequest(requestParams: ResourcesRequest): Resources =
-        Resources.Builder().setVersion(RESOURCES_VERSION).build()
+    override suspend fun resourcesRequest(requestParams: ResourcesRequest): ResourceBuilders.Resources =
+        ResourceBuilders.Resources.Builder().setVersion(RESOURCES_VERSION).build()
 
 
     companion object {
@@ -263,7 +282,7 @@ class WorldClockTileService9 : WorldClockTileService(9)
 
 @Preview(
     name = "Empty Layout",
-    device = Devices.WEAR_OS_SMALL_ROUND,
+    device = WearDevices.SMALL_ROUND,
     showSystemUi = true,
     backgroundColor = 0xff000000,
     showBackground = true,
@@ -280,7 +299,7 @@ fun EmptyLayoutPreview() {
 
 @Preview(
     name = "Time in Russia",
-    device = Devices.WEAR_OS_SMALL_ROUND,
+    device = WearDevices.SMALL_ROUND,
     showSystemUi = true,
     backgroundColor = 0xff000000,
     showBackground = true,
@@ -302,7 +321,7 @@ fun TimeInRussiaPreview() {
 
 @Preview(
     name = "Time in Iran",
-    device = Devices.WEAR_OS_SMALL_ROUND,
+    device = WearDevices.SMALL_ROUND,
     showSystemUi = true,
     backgroundColor = 0xff000000,
     showBackground = true,
@@ -324,7 +343,7 @@ fun TimeInIranPreview() {
 
 @Preview(
     name = "Time Layout",
-    device = Devices.WEAR_OS_SMALL_ROUND,
+    device = WearDevices.SMALL_ROUND,
     showSystemUi = true,
     backgroundColor = 0xff000000,
     showBackground = true,

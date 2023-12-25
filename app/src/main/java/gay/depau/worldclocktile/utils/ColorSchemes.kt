@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColor
 import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.tiles.ColorBuilders
+import androidx.wear.protolayout.ColorBuilders
 import gay.depau.worldclocktile.R
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
@@ -41,7 +41,7 @@ val ComposeColor.foreground: ComposeColor
 enum class ColorScheme(
     private val nameRes: Int,
     private val colorRes: Int,
-    private val colorLightRes: Int
+    private val colorLightRes: Int,
 ) {
     CLOUD(R.string.color_cloud, R.color.cloud, R.color.cloud_light),
     ALMOND(R.string.color_almond, R.color.almond, R.color.almond_light),
@@ -86,10 +86,10 @@ enum class ColorScheme(
     fun getColorLight(context: Context) = context.getColor(colorLightRes).toColor()
 
     fun getColorProp(context: Context) =
-        ColorBuilders.ColorProp.Builder().setArgb(getColor(context).toArgb()).build()
+        ColorBuilders.ColorProp.Builder(getColor(context).toArgb()).build()
 
     fun getColorLightProp(context: Context) =
-        ColorBuilders.ColorProp.Builder().setArgb(getColorLight(context).toArgb()).build()
+        ColorBuilders.ColorProp.Builder(getColorLight(context).toArgb()).build()
 
     companion object {
         val Default = STREAM

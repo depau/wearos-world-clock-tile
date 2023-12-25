@@ -8,9 +8,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -18,18 +32,24 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.wear.compose.foundation.lazy.ScalingLazyListAnchorType
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
-import androidx.wear.compose.material.*
+import androidx.wear.compose.material.Card
+import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.CompactChip
+import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.SplitToggleChip
+import androidx.wear.compose.material.Text
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.tiles.TileService.EXTRA_CLICKABLE_ID
+import androidx.wear.tooling.preview.devices.WearDevices
 import gay.depau.worldclocktile.AppSettings
 import gay.depau.worldclocktile.R
 import gay.depau.worldclocktile.WorldClockTileService
@@ -54,19 +74,16 @@ class TileManagementActivity : ComponentActivity() {
     private lateinit var mSettings: Map<Int, AppSettings>
 
     private fun openTileSettingsActivity(id: Int) {
-        startActivity(
-            Intent(this, TileSettingsActivity::class.java).apply {
-                putExtra(EXTRA_CLICKABLE_ID, "tile$id")
-            }
-        )
+        startActivity(Intent(this, TileSettingsActivity::class.java).apply {
+            putExtra(EXTRA_CLICKABLE_ID, "tile$id")
+        })
     }
 
     private fun refreshEnabledTiles() {
         lifecycleScope.launch {
             for (i in 0..WorldClockTileService.MAX_TILE_ID) {
                 mViewModel.setTileEnabled(
-                    i,
-                    WorldClockTileService.isTileEnabled(this@TileManagementActivity, i)
+                    i, WorldClockTileService.isTileEnabled(this@TileManagementActivity, i)
                 )
             }
             mViewModel.setCanAddRemoveTiles(true)
@@ -100,40 +117,31 @@ class TileManagementActivity : ComponentActivity() {
         setContent {
             val navController = rememberSwipeDismissableNavController()
             SwipeDismissableNavHost(
-                modifier = Modifier.fillMaxSize(),
-                navController = navController,
-                startDestination = "main"
+                modifier = Modifier.fillMaxSize(), navController = navController, startDestination = "main"
             ) {
                 composable("main") {
                     val canEnableMoreTiles by mViewModel.canAddTiles()
                     val canDeleteTiles by mViewModel.canRemoveTiles()
 
-                    TileManagementView(
-                        mViewModel,
-                        setTileEnabled = { id, enabled ->
-                            if ((enabled && canEnableMoreTiles) || (!enabled && canDeleteTiles)) {
-                                try {
-                                    mViewModel.setCanAddRemoveTiles(false)
-                                    WorldClockTileService.setTileEnabled(
-                                        this@TileManagementActivity,
-                                        id,
-                                        enabled
-                                    )
-                                    mViewModel.setTileEnabled(id, enabled)
-                                    mSettings[id]!!.resetTileSettings()
-                                } finally {
-                                    refreshEnabledTiles()
-                                    mViewModel.setCanAddRemoveTiles(true)
-                                }
+                    TileManagementView(mViewModel, setTileEnabled = { id, enabled ->
+                        if ((enabled && canEnableMoreTiles) || (!enabled && canDeleteTiles)) {
+                            try {
+                                mViewModel.setCanAddRemoveTiles(false)
+                                WorldClockTileService.setTileEnabled(
+                                    this@TileManagementActivity, id, enabled
+                                )
+                                mViewModel.setTileEnabled(id, enabled)
+                                mSettings[id]!!.resetTileSettings()
+                            } finally {
+                                refreshEnabledTiles()
+                                mViewModel.setCanAddRemoveTiles(true)
                             }
-                        },
-                        openTileSettings = { id ->
-                            openTileSettingsActivity(id)
-                        },
-                        openAbout = {
-                            navController.navigate("about")
                         }
-                    )
+                    }, openTileSettings = { id ->
+                        openTileSettingsActivity(id)
+                    }, openAbout = {
+                        navController.navigate("about")
+                    })
                 }
                 composable("about") {
                     AboutView()
@@ -155,29 +163,17 @@ fun ChipWithDeleteButton(
     colorScheme: ColorScheme,
 ) {
     if (!deleteEnabled || !allEnabled) {
-        Chip(
-            modifier = modifier,
-            onClick = onClick,
-            enabled = allEnabled,
-            label = label,
-            secondaryLabel = secondaryLabel,
-            colors = themedChipColors { colorScheme }
-        )
+        Chip(modifier = modifier, onClick = onClick, enabled = allEnabled, label = label,
+            secondaryLabel = secondaryLabel, colors = themedChipColors { colorScheme })
     } else {
         SplitToggleChip(
-            modifier = modifier,
-            onClick = onClick,
-            onCheckedChange = { onDelete() },
-            checked = true,
-            label = label,
-            secondaryLabel = secondaryLabel,
-            toggleControl = {
+            modifier = modifier, onClick = onClick, onCheckedChange = { onDelete() }, checked = true, label = label,
+            secondaryLabel = secondaryLabel, toggleControl = {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                     contentDescription = "Delete tile",
                 )
-            },
-            colors = themedSplitChipColors(colorScheme = colorScheme)
+            }, colors = themedSplitChipColors(colorScheme = colorScheme)
         )
     }
 }
@@ -207,9 +203,7 @@ fun TileManagementView(
         ) {
             item("title") {
                 Text(
-                    text = "World clock",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.title2
+                    text = "World clock", textAlign = TextAlign.Center, style = MaterialTheme.typography.title2
                 )
             }
             item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
@@ -220,19 +214,13 @@ fun TileManagementView(
                     modifier = Modifier.fillMaxWidth(),
                     deleteEnabled = canRemoveTiles,
                     label = {
-                        if ((settings.cityName ?: "") == "")
-                            Text(
-                                text = "[Not set]",
-                                fontStyle = FontStyle.Italic,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        else
-                            Text(
-                                text = settings.cityName!!,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                        if ((settings.cityName ?: "") == "") Text(
+                            text = "[Not set]", fontStyle = FontStyle.Italic, maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        else Text(
+                            text = settings.cityName!!, maxLines = 1, overflow = TextOverflow.Ellipsis
+                        )
                     },
                     secondaryLabel = {
                         if (settings.timezoneId != null) {
@@ -242,14 +230,11 @@ fun TileManagementView(
                             }
                             Text(
                                 text = "$time, ${timezoneSimpleNames[settings.timezoneId] ?: settings.timezoneId!!}",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                maxLines = 1, overflow = TextOverflow.Ellipsis
                             )
                         } else {
                             Text(
-                                text = "Tap to set up",
-                                fontStyle = FontStyle.Italic,
-                                maxLines = 1,
+                                text = "Tap to set up", fontStyle = FontStyle.Italic, maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
@@ -265,21 +250,15 @@ fun TileManagementView(
                 Row(
                     modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
-                    CompactChip(
-                        label = {
-                            Text(text = "Add city")
-                        },
-                        enabled = canAddTiles,
-                        onClick = {
-                            setTileEnabled(state.firstAvailableTileId, true)
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_add),
-                                contentDescription = "Add city"
-                            )
-                        }
-                    )
+                    CompactChip(label = {
+                        Text(text = "Add city")
+                    }, enabled = canAddTiles, onClick = {
+                        setTileEnabled(state.firstAvailableTileId, true)
+                    }, icon = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_add), contentDescription = "Add city"
+                        )
+                    })
                 }
             }
             item("spacer3") { Spacer(modifier = Modifier.height(8.dp)) }
@@ -291,8 +270,7 @@ fun TileManagementView(
                 ) {
                     Text(
                         text = "Add up to 10 cities here, then add them to your tiles carousel from your watch home.",
-                        modifier = Modifier.padding(8.dp),
-                        textAlign = TextAlign.Center
+                        modifier = Modifier.padding(8.dp), textAlign = TextAlign.Center
                     )
                 }
             }
@@ -313,40 +291,31 @@ fun TileManagementView(
     }
 
     val tileToDeleteName by remember { derivedStateOf { state.tileSettings[tileToDelete]?.cityName } }
-    YesNoConfirmationDialog(
-        showDialog = showDeleteDialog,
-        title = {
-            Text(text = "Delete tile?")
-        },
-        onYes = {
-            setTileEnabled(tileToDelete!!, false)
-            tileToDelete = null
-        },
-        dismissDialog = { tileToDelete = null }) {
+    YesNoConfirmationDialog(showDialog = showDeleteDialog, title = {
+        Text(text = "Delete tile?")
+    }, onYes = {
+        setTileEnabled(tileToDelete!!, false)
+        tileToDelete = null
+    }, dismissDialog = { tileToDelete = null }) {
         Text(
-            text = tileToDeleteName ?: "[Not set]",
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            text = tileToDeleteName ?: "[Not set]", maxLines = 2, overflow = TextOverflow.Ellipsis,
             fontStyle = if (tileToDeleteName == null) FontStyle.Italic else null
         )
     }
 }
 
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun TileManagementViewPreview() {
     val viewModel = TileManagementViewModel().apply {
         setState(
             TileManagementState(
-                enabledTileIds = listOf(0, 1, 2, 3),
-                tileSettings = mapOf(
+                enabledTileIds = listOf(0, 1, 2, 3), tileSettings = mapOf(
                     0 to TileSettingsState.Empty,
                     1 to TileSettingsState(
-                        cityName = "New York, NY, USA",
-                        timezoneId = "America/New_York",
-                        colorScheme = ColorScheme.ALMOND,
-                        time24h = true
+                        cityName = "New York, NY, USA", timezoneId = "America/New_York",
+                        colorScheme = ColorScheme.ALMOND, time24h = true
                     ),
                     2 to TileSettingsState.Empty,
                     3 to TileSettingsState.Empty,
@@ -356,18 +325,12 @@ fun TileManagementViewPreview() {
                     7 to TileSettingsState.Empty,
                     8 to TileSettingsState.Empty,
                     9 to TileSettingsState.Empty,
-                ),
-                canAddRemoveTiles = true
+                ), canAddRemoveTiles = true
             )
         )
     }
 
-    TileManagementView(
-        viewModel,
-        setTileEnabled = { id, enabled ->
-            viewModel.setTileEnabled(id, enabled)
-        },
-        openTileSettings = { },
-        openAbout = { }
-    )
+    TileManagementView(viewModel, setTileEnabled = { id, enabled ->
+        viewModel.setTileEnabled(id, enabled)
+    }, openTileSettings = { }, openAbout = { })
 }

@@ -3,7 +3,12 @@ package gay.depau.worldclocktile.presentation.viewmodels
 // SPDX-License-Identifier: Apache-2.0
 // This file is part of World Clock Tile.
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import gay.depau.worldclocktile.AppSettings
 import gay.depau.worldclocktile.SettingChangeListener
@@ -31,7 +36,7 @@ class TileManagementViewModel : ViewModel(), SettingChangeListener {
         _state.update {
             it.copy(
                 tileSettings = it.tileSettings + (settings.tileId to TileSettingsState(
-                    settings.timezoneId, settings.cityName, settings.time24h, settings.colorScheme
+                    settings.timezoneId, settings.cityName, settings.time24h, settings.listOrder, settings.colorScheme
                 ))
             )
         }

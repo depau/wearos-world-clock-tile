@@ -21,6 +21,7 @@ class AppSettings(context: Context, val tileId: Int? = null) : SettingsChangeNot
     var cityName: String? by settings.delegate("tile${tileId}_cityName", null)
     var time24h: Boolean by settings.delegate("tile${tileId}_time24h", false)
     var colorScheme: ColorScheme by settings.delegate("tile${tileId}_colorScheme", ColorScheme.Default)
+    var listOrder: Int by settings.delegate("tile${tileId}_listOrder", 0)
 
     fun addListener(listener: SettingChangeListener) {
         listeners.add(listener)

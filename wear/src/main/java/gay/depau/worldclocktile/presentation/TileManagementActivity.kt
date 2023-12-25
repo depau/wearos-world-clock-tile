@@ -131,7 +131,10 @@ class TileManagementActivity : ComponentActivity() {
                                     this@TileManagementActivity, id, enabled
                                 )
                                 mViewModel.setTileEnabled(id, enabled)
-                                mSettings[id]!!.resetTileSettings()
+                                mSettings[id]!!.apply {
+                                    resetTileSettings()
+                                    listOrder = mViewModel.state.value.enabledTileIds.size - 1
+                                }
                             } finally {
                                 refreshEnabledTiles()
                                 mViewModel.setCanAddRemoveTiles(true)
@@ -190,6 +193,11 @@ fun TileManagementView(
     var tileToDelete by remember { mutableStateOf<Int?>(null) }
     val canRemoveTiles by viewModel.canRemoveTiles()
     val showDeleteDialog by remember { derivedStateOf { tileToDelete != null && canRemoveTiles } }
+    val sortedTileIds by remember {
+        derivedStateOf {
+            state.enabledTileIds.sortedBy { state.tileSettings[it]!!.listOrder }.toList()
+        }
+    }
 
     MainView(listState) {
         ScalingLazyColumnWithRSB(
@@ -207,7 +215,7 @@ fun TileManagementView(
                 )
             }
             item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
-            items(state.enabledTileIds, key = { it }) { i ->
+            items(sortedTileIds, key = { it }) { i ->
                 val settings by remember { derivedStateOf { state.tileSettings[i]!! } }
 
                 ChipWithDeleteButton(

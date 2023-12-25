@@ -14,12 +14,18 @@ import gay.depau.worldclocktile.tzdb.City
 import gay.depau.worldclocktile.tzdb.CountryNameAndProvincesDenomination
 import gay.depau.worldclocktile.tzdb.TimezoneDao
 import gay.depau.worldclocktile.utils.ColorScheme
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.update
 
 data class TileSettingsState(
     val timezoneId: String?,
     val cityName: String?,
     val time24h: Boolean,
+    val listOrder: Int = 0,
     val colorScheme: ColorScheme,
     val selectedContinent: String = "",
     val selectedCountry: String = "",
@@ -28,7 +34,7 @@ data class TileSettingsState(
 ) {
     companion object {
         val Empty: TileSettingsState
-            get() = TileSettingsState(null, null, false, ColorScheme.Default)
+            get() = TileSettingsState(null, null, false, 0, ColorScheme.Default)
     }
 }
 
@@ -43,7 +49,7 @@ data class DbListResultCache(
 )
 
 class TileSettingsViewModel(
-    private val timezoneDao: TimezoneDao
+    private val timezoneDao: TimezoneDao,
 ) : ViewModel(), SettingChangeListener {
     private val _state = MutableStateFlow(TileSettingsState.Empty)
     val state: StateFlow<TileSettingsState> = _state.asStateFlow()
@@ -130,7 +136,14 @@ class TileSettingsViewModel(
                 cityName = settings.cityName,
                 time24h = settings.time24h,
                 colorScheme = settings.colorScheme,
+                listOrder = settings.listOrder,
             )
+        }
+    }
+
+    fun setListOrder(order: Int) {
+        _state.update {
+            it.copy(listOrder = order)
         }
     }
 
@@ -151,7 +164,7 @@ class TileSettingsViewModel(
     fun selectCountry(
         country: String,
         provincesDenomination: String? = null,
-        province: String? = null
+        province: String? = null,
     ) {
         _state.update {
             it.copy(

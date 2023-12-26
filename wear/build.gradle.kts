@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
+    kotlin("kapt")
 }
 
 android {
@@ -87,11 +87,13 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     debugImplementation("androidx.wear:wear-tooling-preview:1.0.0")
     debugImplementation("androidx.wear.tiles:tiles-renderer:1.2.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.5.4")
 
     // DB
-    implementation("androidx.room:room-ktx:2.6.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.5.4")
-    ksp("androidx.room:room-compiler:2.6.1")
+    val roomVersion: String by rootProject.extra
+    implementation("androidx.room:room-ktx:$roomVersion")
+    //noinspection KaptUsageInsteadOfKsp
+    kapt("androidx.room:room-compiler:$roomVersion")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")

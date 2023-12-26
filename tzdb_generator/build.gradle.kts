@@ -6,7 +6,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
+    kotlin("kapt")
 }
 
 android {
@@ -71,5 +71,8 @@ dependencies {
 
     // DB
     testImplementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.5.0")
+
+    val roomVersion: String by rootProject.extra
+    //noinspection KaptUsageInsteadOfKsp
+    kapt("androidx.room:room-compiler:$roomVersion")
 }

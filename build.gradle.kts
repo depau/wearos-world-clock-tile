@@ -2,6 +2,7 @@ buildscript {
     val composeVersion by extra("1.5.4")
     val composeCompiler by extra("1.5.7")
     val wearComposeVersion by extra("1.2.1")
+    val roomVersion by extra("2.6.1")
 }
 
 plugins {

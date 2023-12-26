@@ -17,14 +17,14 @@ class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNo
     private val listeners = mutableListOf<SettingChangeListener>()
 
     var dbVersion: Int by settings.delegate("dbVersion", -1)
-    private val _modifyVersion: Int by settings.delegate("modifyVersion", 0)
 
-    var modifyVersion: Int
+    private val _modifyVersion: Long by settings.delegate("modifyVersion", 0)
+    var modifyVersion: Long
         get() = _modifyVersion
         set(value) {
             // Don't use the delegate here, as it will trigger a refresh
             settings.edit().apply {
-                putInt("modifyVersion", value)
+                putLong("modifyVersion", value)
                 apply()
             }
         }

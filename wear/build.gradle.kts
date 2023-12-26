@@ -64,8 +64,11 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     // Wear OS / Tiles
-    implementation("com.google.android.horologist:horologist-compose-tools:0.5.16")
-    implementation("com.google.android.horologist:horologist-tiles:0.5.16")
+    val horologistVersion = "0.5.16"
+    implementation("com.google.android.horologist:horologist-compose-tools:$horologistVersion")
+    implementation("com.google.android.horologist:horologist-compose-layout:$horologistVersion")
+    implementation("com.google.android.horologist:horologist-tiles:$horologistVersion")
+
     implementation("androidx.wear:wear:1.3.0")
     implementation("androidx.wear.tiles:tiles:1.2.0")
     implementation("androidx.wear.tiles:tiles-material:1.2.0")

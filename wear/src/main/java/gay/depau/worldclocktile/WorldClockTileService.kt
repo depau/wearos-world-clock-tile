@@ -293,9 +293,23 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
         fun isTileEnabled(context: Context, tileId: Int): Boolean {
             assert(tileId in 0..MAX_TILE_ID)
             val state = getTileClass(tileId).getComponentEnabled(context)
-            if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) return true
-            // Tile 0 is enabled by default in the manifest
-            return tileId == 0 && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+
+            val enabled =
+                (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) ||
+                        // Tile 0 is enabled by default in the manifest
+                        (tileId == 0 && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+
+            // Ensure the config file is fully populated so it properly syncs with the mobile app
+            TileSettings(context, tileId).apply {
+                if (enabled != isEnabled) {
+                    if (enabled)
+                        ensureConfigPopulated()
+                    else
+                        resetTileSettings()
+                }
+            }
+
+            return enabled
         }
 
         @JvmStatic
@@ -305,7 +319,7 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
 
             TileSettings(context, tileId).apply {
                 if (enabled)
-                    populateDefaults()
+                    ensureConfigPopulated()
                 else
                     resetTileSettings()
             }

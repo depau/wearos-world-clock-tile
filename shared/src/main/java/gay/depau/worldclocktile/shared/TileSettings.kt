@@ -12,7 +12,7 @@ interface SettingChangeListener {
     fun refreshSettings(settings: TileSettings)
 }
 
-class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNotifier {
+class TileSettings(private val context: Context, val tileId: Int? = null) : SettingsChangeNotifier {
     private val settings = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     private val listeners = mutableListOf<SettingChangeListener>()
 
@@ -44,33 +44,44 @@ class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNo
         listeners.forEach { it.refreshSettings(this) }
     }
 
-    fun populateDefaults() {
-        // Ensure the config file contains some data
+    val isEnabled: Boolean
+        get() = settings.contains("tile${tileId}_listOrder")
+
+    fun ensureConfigPopulated() {
         timezoneId = timezoneId
         cityName = cityName
         time24h = time24h
         colorScheme = colorScheme
-        listOrder = listOrder
+
+        if (!isEnabled)
+            listOrder = numEnabledTiles(context)
     }
 
-    fun resetTileSettings() = settings.edit().apply {
-        tileId!!
-        remove("tile${tileId}_timezoneId")
-        remove("tile${tileId}_cityName")
-        remove("tile${tileId}_time24h")
-        remove("tile${tileId}_colorScheme")
-        remove("tile${tileId}_listOrder")
-        apply()
-        notifyListeners()
+    fun resetTileSettings() {
+        settings.edit().apply {
+            tileId!!
+            remove("tile${tileId}_timezoneId")
+            remove("tile${tileId}_cityName")
+            remove("tile${tileId}_time24h")
+            remove("tile${tileId}_colorScheme")
+            remove("tile${tileId}_listOrder")
+            apply()
+            notifyListeners()
+        }
     }
 
     companion object {
         fun getEnabledTileSettings(context: Context): Map<Int, TileSettings> {
             val settings = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
-            return settings.all.filter { it.key.endsWith("_timezoneId") }
-                .map { it.key.removeSuffix("_timezoneId").removePrefix("tile") to it.value }
+            return settings.all.filter { it.key.endsWith("_listOrder") }
+                .map { it.key.removeSuffix("_listOrder").removePrefix("tile") to it.value }
                 .associate { it.first.toInt() to TileSettings(context, it.first.toInt()) }
+        }
+
+        fun numEnabledTiles(context: Context): Int {
+            val settings = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            return settings.all.filter { it.key.endsWith("_listOrder") }.count()
         }
     }
 }

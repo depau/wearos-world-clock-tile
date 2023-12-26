@@ -10,7 +10,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,11 +39,9 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyListAnchorType
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Card
-import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.CompactChip
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.SplitToggleChip
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
@@ -54,11 +51,10 @@ import androidx.wear.tooling.preview.devices.WearDevices
 import gay.depau.worldclocktile.R
 import gay.depau.worldclocktile.WorldClockTileService.Companion.isTileEnabled
 import gay.depau.worldclocktile.WorldClockTileService.Companion.setTileEnabled
+import gay.depau.worldclocktile.composables.ChipWithDeleteButton
 import gay.depau.worldclocktile.composables.MainView
 import gay.depau.worldclocktile.composables.ScalingLazyColumnWithRSB
 import gay.depau.worldclocktile.composables.YesNoConfirmationDialog
-import gay.depau.worldclocktile.presentation.theme.themedChipColors
-import gay.depau.worldclocktile.presentation.theme.themedSplitChipColors
 import gay.depau.worldclocktile.presentation.views.AboutView
 import gay.depau.worldclocktile.shared.MAX_TILE_ID
 import gay.depau.worldclocktile.shared.TileSettings
@@ -157,32 +153,6 @@ class TileManagementActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun ChipWithDeleteButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    onDelete: () -> Unit,
-    allEnabled: Boolean = true,
-    deleteEnabled: Boolean = true,
-    label: @Composable RowScope.() -> Unit,
-    secondaryLabel: @Composable (RowScope.() -> Unit)? = null,
-    colorScheme: ColorScheme,
-) {
-    if (!deleteEnabled || !allEnabled) {
-        Chip(modifier = modifier, onClick = onClick, enabled = allEnabled, label = label,
-            secondaryLabel = secondaryLabel, colors = themedChipColors { colorScheme })
-    } else {
-        SplitToggleChip(
-            modifier = modifier, onClick = onClick, onCheckedChange = { onDelete() }, checked = true, label = label,
-            secondaryLabel = secondaryLabel, toggleControl = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                    contentDescription = "Delete tile",
-                )
-            }, colors = themedSplitChipColors(colorScheme = colorScheme)
-        )
-    }
-}
 
 @Composable
 fun TileManagementViewModel.canAddTiles(): State<Boolean> {

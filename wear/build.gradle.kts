@@ -43,7 +43,9 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro", "proguard-rules-debug.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro", "proguard-rules-debug.pro"
+            )
         }
     }
     compileOptions {
@@ -51,7 +53,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     composeOptions {
-        val composeCompiler by extra { "1.5.7" }
+        val composeCompiler: String by rootProject.extra
         kotlinCompilerExtensionVersion = composeCompiler
     }
 }
@@ -67,8 +69,8 @@ dependencies {
     implementation("androidx.wear:wear:1.3.0")
     implementation("androidx.wear.tiles:tiles:1.2.0")
     implementation("androidx.wear.tiles:tiles-material:1.2.0")
-    val composeVersion by extra { "1.5.4" }
-    val wearComposeVersion by extra { "1.2.1" }
+    val composeVersion: String by rootProject.extra
+    val wearComposeVersion: String by rootProject.extra
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.wear.compose:compose-material:$wearComposeVersion")
     implementation("androidx.wear.compose:compose-foundation:$wearComposeVersion")
@@ -82,12 +84,13 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
     debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
 
-    debugImplementation("androidx.compose.ui:ui-tooling-preview:1.5.4")
+    debugImplementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     debugImplementation("androidx.wear:wear-tooling-preview:1.0.0")
     debugImplementation("androidx.wear.tiles:tiles-renderer:1.2.0")
 
     // DB
     implementation("androidx.room:room-ktx:2.6.1")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.5.4")
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")

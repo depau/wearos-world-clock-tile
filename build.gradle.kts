@@ -1,7 +1,7 @@
 buildscript {
-    extra["composeVersion"] = "1.5.4"
-    extra["composeCompiler"] = "1.5.7"
-    extra["wearComposeVersion"] = "1.2.1"
+    val composeVersion by extra("1.5.4")
+    val composeCompiler by extra("1.5.7")
+    val wearComposeVersion by extra("1.2.1")
 }
 
 plugins {

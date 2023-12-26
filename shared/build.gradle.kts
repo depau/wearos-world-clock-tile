@@ -40,7 +40,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
 
-    val composeVersion by extra { "1.5.4" }
+    val composeVersion: String by rootProject.extra
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.wear.compose:compose-material:1.2.1")
 

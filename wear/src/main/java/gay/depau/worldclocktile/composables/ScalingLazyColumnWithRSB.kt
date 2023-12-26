@@ -8,11 +8,8 @@ import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.AutoCenteringParams
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -46,12 +43,10 @@ fun ScalingLazyColumnWithRSB(
     autoCentering: AutoCenteringParams? = AutoCenteringParams(),
     content: ScalingLazyListScope.() -> Unit,
 ) {
-    val focusRequester = remember { FocusRequester() }
     ScalingLazyColumn(
         modifier = modifier.rotaryWithScroll(
             scrollableState = state,
             flingBehavior = flingBehavior,
-            focusRequester = focusRequester
         ),
         state = state,
         contentPadding = contentPadding,
@@ -65,7 +60,4 @@ fun ScalingLazyColumnWithRSB(
         anchorType = anchorType,
         content = content
     )
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 }

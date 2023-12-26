@@ -96,6 +96,7 @@ import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
 import gay.depau.worldclocktile.shared.viewmodels.TileSettingsState
 import gay.depau.worldclocktile.utils.foreground
 import kotlinx.coroutines.delay
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
@@ -275,7 +276,7 @@ fun ColorIcon(
 }
 
 @Composable
-fun TilePreviewModule(viewModel: TileSettingsViewModel) {
+fun TilePreviewModule(viewModel: TileSettingsViewModel, previewTime: LocalDateTime? = null) {
     val state by viewModel.state.collectAsState()
     val colorScheme = state.colorScheme
     val context = LocalContext.current
@@ -283,11 +284,13 @@ fun TilePreviewModule(viewModel: TileSettingsViewModel) {
     val colorLight by remember { derivedStateOf { colorScheme.getColorLight(context).composeColor } }
     val timezoneId by remember { derivedStateOf { state.timezoneId ?: TimeZone.getDefault().id } }
 
-    var currentTime by remember { mutableStateOf(currentTimeAt(timezoneId).reducedPrecision) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            currentTime = currentTimeAt(timezoneId).reducedPrecision
-            delay(1000)
+    var currentTime by remember { mutableStateOf(previewTime ?: currentTimeAt(timezoneId).reducedPrecision) }
+    if (previewTime == null) {
+        LaunchedEffect(Unit) {
+            while (true) {
+                currentTime = currentTimeAt(timezoneId).reducedPrecision
+                delay(1000)
+            }
         }
     }
 
@@ -339,6 +342,7 @@ fun MainSettingsView(
     openAbout: () -> Unit,
     openTileManagement: () -> Unit,
     renameCity: (String) -> Unit,
+    previewTime: LocalDateTime? = null,
 ) {
     val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
     val state by viewModel.state.collectAsState()
@@ -356,7 +360,7 @@ fun MainSettingsView(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item("preview") {
-                TilePreviewModule(viewModel = viewModel)
+                TilePreviewModule(viewModel = viewModel, previewTime = previewTime)
             }
             item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
             item("caret") {
@@ -922,16 +926,15 @@ fun previewViewModel(context: Context): TileSettingsViewModel {
     return TileSettingsViewModel(dao).apply {
         setState(
             TileSettingsState(
-                cityName = "Manila, Philippines", colorScheme = ColorScheme.Default, time24h = false,
+                cityName = "Awa'atlu, Pandora", colorScheme = ColorScheme.Default, time24h = false,
                 timezoneId = "Asia/Manila"
             )
         )
     }
 }
 
-@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
-fun MainSettingsPreview() {
+fun MainSettingsPreviewBase(previewTime: LocalDateTime? = null) {
     val context = LocalContext.current
     val viewModel = remember { previewViewModel(context) }
     val state by viewModel.state.collectAsState()
@@ -940,7 +943,31 @@ fun MainSettingsPreview() {
         viewModel.setState(state.copy(time24h = it))
     }, {}, {}, {}, {}, {
         viewModel.setState(state.copy(cityName = it))
-    })
+    }, previewTime)
+}
+
+@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
+@Composable
+fun MainSettingsPreviewSmallRound() {
+    MainSettingsPreviewBase(LocalDateTime.of(2023, 12, 31, 0, 59, 59))
+}
+
+@Preview(device = WearDevices.LARGE_ROUND, showSystemUi = true)
+@Composable
+fun MainSettingsPreviewLargeRound() {
+    MainSettingsPreviewBase(LocalDateTime.of(2023, 12, 31, 0, 59, 59))
+}
+
+@Preview(device = WearDevices.SQUARE, showSystemUi = true)
+@Composable
+fun MainSettingsPreviewSquare() {
+    MainSettingsPreviewBase(LocalDateTime.of(2023, 12, 31, 0, 59, 59))
+}
+
+@Preview(device = WearDevices.RECT, showSystemUi = true)
+@Composable
+fun MainSettingsPreviewRect() {
+    MainSettingsPreviewBase(LocalDateTime.of(2023, 12, 31, 0, 59, 59))
 }
 
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)

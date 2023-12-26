@@ -79,19 +79,21 @@ import gay.depau.worldclocktile.composables.rememberForeverScalingLazyListState
 import gay.depau.worldclocktile.presentation.theme.chipGradientColors
 import gay.depau.worldclocktile.presentation.theme.themedChipColors
 import gay.depau.worldclocktile.presentation.theme.toggleChipColors
-import gay.depau.worldclocktile.shared.viewmodels.TileSettingsState
 import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsViewModel
 import gay.depau.worldclocktile.presentation.views.AboutView
 import gay.depau.worldclocktile.shared.MAX_TILE_ID
 import gay.depau.worldclocktile.shared.TileSettings
+import gay.depau.worldclocktile.shared.tzdb.DbLessSampleDataDao
 import gay.depau.worldclocktile.shared.tzdb.TimezoneDatabase
 import gay.depau.worldclocktile.shared.tzdb.populateWithSampleData
 import gay.depau.worldclocktile.shared.utils.ColorScheme
+import gay.depau.worldclocktile.shared.utils.PreviewContextWrapper
 import gay.depau.worldclocktile.shared.utils.composeColor
 import gay.depau.worldclocktile.shared.utils.currentTimeAt
 import gay.depau.worldclocktile.shared.utils.reducedPrecision
 import gay.depau.worldclocktile.shared.utils.timezoneOffsetDescription
 import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
+import gay.depau.worldclocktile.shared.viewmodels.TileSettingsState
 import gay.depau.worldclocktile.utils.foreground
 import kotlinx.coroutines.delay
 import java.time.format.DateTimeFormatter
@@ -823,12 +825,13 @@ fun CitySelectionView(
 fun SearchView(
     viewModel: TileSettingsViewModel,
     queryStartTime: Long = 0L,
+    initialQuery: String = "",
     setTimezoneIDCity: (String, String) -> Unit,
 ) {
     val listState = rememberForeverScalingLazyListState(
         key = "search", params = queryStartTime
     )
-    var query by remember { mutableStateOf("") }
+    var query by remember { mutableStateOf(initialQuery) }
     val state by viewModel.state.collectAsState()
     val results by viewModel.searchCities(query).collectAsState(initial = emptyList())
     val context = LocalContext.current
@@ -904,9 +907,18 @@ fun SearchView(
 }
 
 fun previewViewModel(context: Context): TileSettingsViewModel {
-    val db = Room.inMemoryDatabaseBuilder(context, TimezoneDatabase::class.java).allowMainThreadQueries().build()
-    val dao = db.getTimezoneDao()
-    populateWithSampleData(dao)
+    val dao = try {
+        val contextWrapper = PreviewContextWrapper(context)
+        val db =
+            Room.inMemoryDatabaseBuilder(contextWrapper, TimezoneDatabase::class.java).allowMainThreadQueries().build()
+        val dbDao = db.getTimezoneDao()
+        populateWithSampleData(dbDao)
+        dbDao
+    } catch (e: Exception) {
+        e.printStackTrace()
+        DbLessSampleDataDao()
+    }
+
     return TileSettingsViewModel(dao).apply {
         setState(
             TileSettingsState(
@@ -968,7 +980,7 @@ fun CountrySelectionPreview() {
 fun ProvinceSelectionPreview() {
     val context = LocalContext.current
     val viewModel = remember { previewViewModel(context) }
-    ProvinceSelectionView(viewModel, "Philippines", "regions") { _, _ -> }
+    ProvinceSelectionView(viewModel, "Italy", "regions") { _, _ -> }
 }
 
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
@@ -976,7 +988,7 @@ fun ProvinceSelectionPreview() {
 fun CitySelectionPreview() {
     val context = LocalContext.current
     val viewModel = remember { previewViewModel(context) }
-    CitySelectionView(viewModel, "Philippines", "Metro Manila") { _, _ -> }
+    CitySelectionView(viewModel, "Italy", "Lombardy") { _, _ -> }
 }
 
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
@@ -984,5 +996,5 @@ fun CitySelectionPreview() {
 fun SearchResultsSelectPreview() {
     val context = LocalContext.current
     val viewModel = remember { previewViewModel(context) }
-    SearchView(viewModel) { _, _ -> }
+    SearchView(viewModel, initialQuery = "strawberries") { _, _ -> }
 }

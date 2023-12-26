@@ -302,6 +302,13 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
         fun setTileEnabled(context: Context, tileId: Int, enabled: Boolean) {
             assert(tileId in 0..MAX_TILE_ID)
             getTileClass(tileId).setComponentEnabled(context, enabled)
+
+            TileSettings(context, tileId).apply {
+                if (enabled)
+                    populateDefaults()
+                else
+                    resetTileSettings()
+            }
         }
     }
 }

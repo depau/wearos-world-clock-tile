@@ -44,6 +44,15 @@ class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNo
         listeners.forEach { it.refreshSettings(this) }
     }
 
+    fun populateDefaults() {
+        // Ensure the config file contains some data
+        timezoneId = timezoneId
+        cityName = cityName
+        time24h = time24h
+        colorScheme = colorScheme
+        listOrder = listOrder
+    }
+
     fun resetTileSettings() = settings.edit().apply {
         tileId!!
         remove("tile${tileId}_timezoneId")
@@ -53,5 +62,15 @@ class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNo
         remove("tile${tileId}_listOrder")
         apply()
         notifyListeners()
+    }
+
+    companion object {
+        fun getEnabledTileSettings(context: Context): Map<Int, TileSettings> {
+            val settings = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+            return settings.all.filter { it.key.endsWith("_timezoneId") }
+                .map { it.key.removeSuffix("_timezoneId").removePrefix("tile") to it.value }
+                .associate { it.first.toInt() to TileSettings(context, it.first.toInt()) }
+        }
     }
 }

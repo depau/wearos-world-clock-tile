@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -182,6 +183,29 @@ fun ChipWithDeleteButton(
         )
     }
 }
+
+@Composable
+fun TileManagementViewModel.canAddTiles(): State<Boolean> {
+    val stateValue by state.collectAsState()
+    return remember(stateValue.enabledTileIds, stateValue.canAddRemoveTiles) {
+        derivedStateOf {
+            stateValue.canAddRemoveTiles &&
+                    stateValue.enabledTileIds.size <= MAX_TILE_ID
+        }
+    }
+}
+
+@Composable
+fun TileManagementViewModel.canRemoveTiles(): State<Boolean> {
+    val stateValue by state.collectAsState()
+    return remember(stateValue.enabledTileIds, stateValue.canAddRemoveTiles) {
+        derivedStateOf {
+            stateValue.canAddRemoveTiles &&
+                    stateValue.enabledTileIds.size > 1
+        }
+    }
+}
+
 
 @Composable
 fun TileManagementView(

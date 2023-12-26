@@ -67,13 +67,13 @@ dependencies {
     implementation("androidx.wear:wear:1.3.0")
     implementation("androidx.wear.tiles:tiles:1.2.0")
     implementation("androidx.wear.tiles:tiles-material:1.2.0")
-    implementation("androidx.compose.material3:material3:1.1.2")
-    val composeVersion by extra { "1.5.7" }
+    val composeVersion by extra { "1.5.4" }
     val wearComposeVersion by extra { "1.2.1" }
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.wear.compose:compose-material:$wearComposeVersion")
     implementation("androidx.wear.compose:compose-foundation:$wearComposeVersion")
     implementation("androidx.wear.compose:compose-navigation:$wearComposeVersion")
+    implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.wear:wear-remote-interactions:1.0.0")

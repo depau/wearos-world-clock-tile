@@ -41,36 +41,6 @@ class TileManagementViewModel : ViewModel(), gay.depau.worldclocktile.shared.Set
         }
     }
 
-    @Composable
-    fun rememberTileSettings(tileId: Int): State<TileSettingsState> {
-        val stateValue by state.collectAsState()
-        return remember(stateValue.tileSettings, tileId) {
-            derivedStateOf { stateValue.tileSettings[tileId] ?: TileSettingsState.Empty }
-        }
-    }
-
-    @Composable
-    fun canAddTiles(): State<Boolean> {
-        val stateValue by state.collectAsState()
-        return remember(stateValue.enabledTileIds, stateValue.canAddRemoveTiles) {
-            derivedStateOf {
-                stateValue.canAddRemoveTiles &&
-                        stateValue.enabledTileIds.size <= MAX_TILE_ID
-            }
-        }
-    }
-
-    @Composable
-    fun canRemoveTiles(): State<Boolean> {
-        val stateValue by state.collectAsState()
-        return remember(stateValue.enabledTileIds, stateValue.canAddRemoveTiles) {
-            derivedStateOf {
-                stateValue.canAddRemoveTiles &&
-                        stateValue.enabledTileIds.size > 1
-            }
-        }
-    }
-
     fun setState(state: TileManagementState) {
         _state.update { state }
     }

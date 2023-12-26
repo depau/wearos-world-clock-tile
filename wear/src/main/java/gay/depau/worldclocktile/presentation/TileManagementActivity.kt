@@ -51,20 +51,22 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.tiles.TileService.EXTRA_CLICKABLE_ID
 import androidx.wear.tooling.preview.devices.WearDevices
 import gay.depau.worldclocktile.R
-import gay.depau.worldclocktile.WorldClockTileService
+import gay.depau.worldclocktile.WorldClockTileService.Companion.isTileEnabled
+import gay.depau.worldclocktile.WorldClockTileService.Companion.setTileEnabled
 import gay.depau.worldclocktile.composables.MainView
 import gay.depau.worldclocktile.composables.ScalingLazyColumnWithRSB
 import gay.depau.worldclocktile.composables.YesNoConfirmationDialog
 import gay.depau.worldclocktile.presentation.theme.themedChipColors
 import gay.depau.worldclocktile.presentation.theme.themedSplitChipColors
-import gay.depau.worldclocktile.presentation.viewmodels.TileManagementState
-import gay.depau.worldclocktile.presentation.viewmodels.TileManagementViewModel
-import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsState
 import gay.depau.worldclocktile.presentation.views.AboutView
+import gay.depau.worldclocktile.shared.MAX_TILE_ID
 import gay.depau.worldclocktile.shared.TileSettings
 import gay.depau.worldclocktile.shared.utils.ColorScheme
 import gay.depau.worldclocktile.shared.utils.currentTimeAt
 import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
+import gay.depau.worldclocktile.shared.viewmodels.TileManagementState
+import gay.depau.worldclocktile.shared.viewmodels.TileManagementViewModel
+import gay.depau.worldclocktile.shared.viewmodels.TileSettingsState
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 
@@ -81,9 +83,9 @@ class TileManagementActivity : ComponentActivity() {
 
     private fun refreshEnabledTiles() {
         lifecycleScope.launch {
-            for (i in 0..WorldClockTileService.MAX_TILE_ID) {
+            for (i in 0..MAX_TILE_ID) {
                 mViewModel.setTileEnabled(
-                    i, WorldClockTileService.isTileEnabled(this@TileManagementActivity, i)
+                    i, isTileEnabled(this@TileManagementActivity, i)
                 )
             }
             mViewModel.setCanAddRemoveTiles(true)
@@ -93,7 +95,7 @@ class TileManagementActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
 
-        for (i in 0..WorldClockTileService.MAX_TILE_ID) {
+        for (i in 0..MAX_TILE_ID) {
             mViewModel.refreshSettings(mSettings[i]!!)
         }
         refreshEnabledTiles()
@@ -103,7 +105,7 @@ class TileManagementActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val settings = mutableMapOf<Int, TileSettings>()
-        for (i in 0..WorldClockTileService.MAX_TILE_ID) {
+        for (i in 0..MAX_TILE_ID) {
             settings[i] = TileSettings(this, i).apply {
                 addListener(mViewModel)
                 mViewModel.refreshSettings(this)
@@ -127,7 +129,7 @@ class TileManagementActivity : ComponentActivity() {
                         if ((enabled && canEnableMoreTiles) || (!enabled && canDeleteTiles)) {
                             try {
                                 mViewModel.setCanAddRemoveTiles(false)
-                                WorldClockTileService.setTileEnabled(
+                                setTileEnabled(
                                     this@TileManagementActivity, id, enabled
                                 )
                                 mViewModel.setTileEnabled(id, enabled)

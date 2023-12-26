@@ -21,7 +21,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    packagingOptions {
+    packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes.add("META-INF/atomicfu.kotlin_module")
@@ -51,7 +51,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
+        val composeCompiler by extra { "1.5.7" }
+        kotlinCompilerExtensionVersion = composeCompiler
     }
 }
 
@@ -67,18 +68,19 @@ dependencies {
     implementation("androidx.wear.tiles:tiles:1.2.0")
     implementation("androidx.wear.tiles:tiles-material:1.2.0")
     implementation("androidx.compose.material3:material3:1.1.2")
-    val compose_version by extra { "1.5.7" }
-    implementation("androidx.compose.ui:ui:$compose_version")
-    implementation("androidx.wear.compose:compose-material:1.2.1")
-    implementation("androidx.wear.compose:compose-foundation:1.2.1")
-    implementation("androidx.wear.compose:compose-navigation:1.2.1")
+    val composeVersion by extra { "1.5.7" }
+    val wearComposeVersion by extra { "1.2.1" }
+    implementation("androidx.compose.ui:ui:$composeVersion")
+    implementation("androidx.wear.compose:compose-material:$wearComposeVersion")
+    implementation("androidx.wear.compose:compose-foundation:$wearComposeVersion")
+    implementation("androidx.wear.compose:compose-navigation:$wearComposeVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.wear:wear-remote-interactions:1.0.0")
     implementation("androidx.compose.animation:animation-graphics:1.5.4")
     implementation(project(":shared"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
 
     debugImplementation("androidx.compose.ui:ui-tooling-preview:1.5.4")
     debugImplementation("androidx.wear:wear-tooling-preview:1.0.0")

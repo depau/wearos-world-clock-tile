@@ -1,6 +1,7 @@
 buildscript {
-    extra["compose_version"] = "1.5.4"
-    extra["wear_compose_version"] = "1.2.1"
+    extra["composeVersion"] = "1.5.4"
+    extra["composeCompiler"] = "1.5.7"
+    extra["wearComposeVersion"] = "1.2.1"
 }
 
 plugins {

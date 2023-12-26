@@ -29,6 +29,7 @@ class TileSettings(context: Context, val tileId: Int? = null) : SettingsChangeNo
             }
         }
 
+    var enabled: Boolean by settings.delegate("tile${tileId}_enabled", false)
     var timezoneId: String? by settings.delegate("tile${tileId}_timezoneId", null)
     var cityName: String? by settings.delegate("tile${tileId}_cityName", null)
     var time24h: Boolean by settings.delegate("tile${tileId}_time24h", false)

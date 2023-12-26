@@ -37,7 +37,8 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        val composeCompiler by extra { "1.5.7" }
+        kotlinCompilerExtensionVersion = composeCompiler
     }
     packaging {
         resources {

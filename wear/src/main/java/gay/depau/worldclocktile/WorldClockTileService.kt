@@ -40,6 +40,8 @@ import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.tiles.SuspendingTileService
 import gay.depau.worldclocktile.composables.TilePreview
 import gay.depau.worldclocktile.presentation.TileSettingsActivity
+import gay.depau.worldclocktile.shared.MAX_TILE_ID
+import gay.depau.worldclocktile.shared.TileSettings
 import gay.depau.worldclocktile.shared.utils.ColorScheme
 import gay.depau.worldclocktile.shared.utils.currentTimeAt
 import gay.depau.worldclocktile.shared.utils.getComponentEnabled
@@ -146,11 +148,11 @@ fun Context.timeLayout(
 
 @OptIn(ExperimentalHorologistApi::class)
 abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileService() {
-    private lateinit var mSettings: gay.depau.worldclocktile.shared.TileSettings
+    private lateinit var mSettings: TileSettings
 
     override fun onCreate() {
         super.onCreate()
-        mSettings = gay.depau.worldclocktile.shared.TileSettings(this, tileId)
+        mSettings = TileSettings(this, tileId)
     }
 
     override suspend fun tileRequest(requestParams: RequestBuilders.TileRequest): Tile {
@@ -293,16 +295,21 @@ abstract class WorldClockTileService(private val tileId: Int) : SuspendingTileSe
             val state = getTileClass(tileId).getComponentEnabled(context)
             if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) return true
             // Tile 0 is enabled by default in the manifest
-            return tileId == 0 && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+            val enabled = tileId == 0 && state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+
+            val settings = TileSettings(context, tileId)
+            if (settings.enabled != enabled) settings.enabled = enabled
+
+            return enabled
         }
 
         @JvmStatic
         fun setTileEnabled(context: Context, tileId: Int, enabled: Boolean) {
             assert(tileId in 0..MAX_TILE_ID)
             getTileClass(tileId).setComponentEnabled(context, enabled)
-        }
 
-        const val MAX_TILE_ID = 49
+            TileSettings(context, tileId).enabled = enabled
+        }
     }
 }
 

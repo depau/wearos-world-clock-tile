@@ -79,9 +79,10 @@ import gay.depau.worldclocktile.composables.rememberForeverScalingLazyListState
 import gay.depau.worldclocktile.presentation.theme.chipGradientColors
 import gay.depau.worldclocktile.presentation.theme.themedChipColors
 import gay.depau.worldclocktile.presentation.theme.toggleChipColors
-import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsState
+import gay.depau.worldclocktile.shared.viewmodels.TileSettingsState
 import gay.depau.worldclocktile.presentation.viewmodels.TileSettingsViewModel
 import gay.depau.worldclocktile.presentation.views.AboutView
+import gay.depau.worldclocktile.shared.MAX_TILE_ID
 import gay.depau.worldclocktile.shared.TileSettings
 import gay.depau.worldclocktile.shared.tzdb.TimezoneDatabase
 import gay.depau.worldclocktile.shared.tzdb.populateWithSampleData
@@ -124,7 +125,7 @@ class TileSettingsActivity : ComponentActivity() {
         } else {
             try {
                 val id = clickableId.substring(4).toInt()
-                if (id in 0..WorldClockTileService.MAX_TILE_ID) {
+                if (id in 0..MAX_TILE_ID) {
                     tileId = id
                 } else {
                     Toast.makeText(this, "Invalid tile", Toast.LENGTH_SHORT).show()

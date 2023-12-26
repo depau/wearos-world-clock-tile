@@ -1,4 +1,4 @@
-package gay.depau.worldclocktile.presentation.viewmodels
+package gay.depau.worldclocktile.shared.viewmodels
 
 // SPDX-License-Identifier: Apache-2.0
 // This file is part of World Clock Tile.
@@ -10,11 +10,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
-import gay.depau.worldclocktile.WorldClockTileService
+import gay.depau.worldclocktile.shared.MAX_TILE_ID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+
 
 data class TileManagementState(
     val enabledTileIds: List<Int>,
@@ -22,7 +23,7 @@ data class TileManagementState(
     val canAddRemoveTiles: Boolean = false,
 ) {
     val firstAvailableTileId: Int
-        get() = (0..WorldClockTileService.MAX_TILE_ID).first { it !in enabledTileIds }
+        get() = (0..MAX_TILE_ID).first { it !in enabledTileIds }
 }
 
 class TileManagementViewModel : ViewModel(), gay.depau.worldclocktile.shared.SettingChangeListener {
@@ -54,7 +55,7 @@ class TileManagementViewModel : ViewModel(), gay.depau.worldclocktile.shared.Set
         return remember(stateValue.enabledTileIds, stateValue.canAddRemoveTiles) {
             derivedStateOf {
                 stateValue.canAddRemoveTiles &&
-                        stateValue.enabledTileIds.size <= WorldClockTileService.MAX_TILE_ID
+                        stateValue.enabledTileIds.size <= MAX_TILE_ID
             }
         }
     }

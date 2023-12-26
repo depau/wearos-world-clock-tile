@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -319,14 +320,19 @@ fun TilePreviewModule(viewModel: TileSettingsViewModel, previewTime: LocalDateTi
             )
             if (!state.time24h) {
                 Text(
-                    modifier = Modifier.padding(bottom = 8.dp), text = if (currentTime.hour < 12) {
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = if (currentTime.hour < 12) {
                         "AM"
                     } else {
                         "PM"
-                    }, style = MaterialTheme.typography.title1.copy(
+                    },
+                    style = MaterialTheme.typography.title1.copy(
                         fontSize = 24.sp, color = color
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip,
+
                     )
-                )
             }
         }
         Text(text = timezoneOffsetDescription(timezoneId), color = colorLight)
@@ -348,11 +354,14 @@ fun MainSettingsView(
     val state by viewModel.state.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
 
+    val itemsModifier = Modifier.padding(horizontal = 10.dp)
+
     MainView(listState) {
         ScalingLazyColumnWithRSB(
             state = listState,
             autoCentering = AutoCenteringParams(itemIndex = 0),
             modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(0.dp),
             verticalArrangement = Arrangement.spacedBy(
                 space = 4.dp, alignment = Alignment.Top
             ),
@@ -362,10 +371,10 @@ fun MainSettingsView(
             item("preview") {
                 TilePreviewModule(viewModel = viewModel, previewTime = previewTime)
             }
-            item("spacer1") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer1") { Spacer(modifier = itemsModifier.height(8.dp)) }
             item("caret") {
                 Row(
-                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                    modifier = itemsModifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_caret_down),
@@ -373,11 +382,11 @@ fun MainSettingsView(
                     )
                 }
             }
-            item("spacer2") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer2") { Spacer(modifier = itemsModifier.height(8.dp)) }
             item("heading") { Text("Settings") }
-            item("spacer3") { Spacer(modifier = Modifier) }
+            item("spacer3") { Spacer(modifier = itemsModifier) }
             item("nameButton") {
-                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Name") }, secondaryLabel = {
+                Chip(modifier = itemsModifier.fillMaxWidth(), label = { Text("Name") }, secondaryLabel = {
                     Text(
                         text = state.cityName ?: "[not set]", maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
@@ -388,7 +397,7 @@ fun MainSettingsView(
                 })
             }
             item("timezoneButton") {
-                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Time zone") }, secondaryLabel = {
+                Chip(modifier = itemsModifier.fillMaxWidth(), label = { Text("Time zone") }, secondaryLabel = {
                     if (state.timezoneId != null) Text(
                         timezoneSimpleNames[state.timezoneId] ?: state.timezoneId!!, maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -400,7 +409,7 @@ fun MainSettingsView(
                 })
             }
             item("colorButton") {
-                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("Color") }, secondaryLabel = {
+                Chip(modifier = itemsModifier.fillMaxWidth(), label = { Text("Color") }, secondaryLabel = {
                     val context = LocalContext.current
                     val colorName by remember {
                         derivedStateOf {
@@ -421,7 +430,7 @@ fun MainSettingsView(
             item("24hourButton") {
                 val context = LocalContext.current
                 val themeColor by remember { derivedStateOf { state.colorScheme.getColor(context).composeColor } }
-                ToggleChip(modifier = Modifier.fillMaxWidth(), checked = state.time24h,
+                ToggleChip(modifier = itemsModifier.fillMaxWidth(), checked = state.time24h,
                     onCheckedChange = { set24Hour(it) }, label = { Text("24 hour time") },
                     colors = toggleChipColors(colorScheme = state.colorScheme), toggleControl = {
                         Switch(
@@ -436,10 +445,10 @@ fun MainSettingsView(
                     })
             }
 
-            item("spacer4") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer4") { Spacer(modifier = itemsModifier.height(8.dp)) }
 
             item("manageTilesButton") {
-                Chip(modifier = Modifier.fillMaxWidth(), label = { Text("All cities…") }, onClick = openTileManagement,
+                Chip(modifier = itemsModifier.fillMaxWidth(), label = { Text("All cities…") }, onClick = openTileManagement,
                     colors = themedChipColors { state.colorScheme }, icon = {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_globe),
@@ -448,11 +457,11 @@ fun MainSettingsView(
                     })
             }
 
-            item("spacer5") { Spacer(modifier = Modifier.height(8.dp)) }
+            item("spacer5") { Spacer(modifier = itemsModifier.height(8.dp)) }
 
             item("aboutButton") {
                 Row(
-                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                    modifier = itemsModifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     IconButton(onClick = openAbout, modifier = Modifier.size(40.dp), content = {
                         Icon(

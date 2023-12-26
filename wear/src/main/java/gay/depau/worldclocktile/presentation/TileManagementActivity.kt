@@ -81,9 +81,7 @@ class TileManagementActivity : ComponentActivity() {
     private fun refreshEnabledTiles() {
         lifecycleScope.launch {
             for (i in 0..MAX_TILE_ID) {
-                mViewModel.setTileEnabled(
-                    i, isTileEnabled(this@TileManagementActivity, i)
-                )
+                mViewModel.setTileEnabled(i, isTileEnabled(this@TileManagementActivity, i))
             }
             mViewModel.setCanAddRemoveTiles(true)
         }

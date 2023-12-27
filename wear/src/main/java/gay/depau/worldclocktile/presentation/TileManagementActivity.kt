@@ -313,7 +313,8 @@ fun TileManagementViewPreview() {
     val viewModel = TileManagementViewModel().apply {
         setState(
             TileManagementState(
-                enabledTileIds = listOf(0, 1, 2, 3), tileSettings = mapOf(
+                enabledTileIds = listOf(0, 1, 2, 3),
+                tileSettings = mapOf(
                     0 to TileSettingsState.Empty,
                     1 to TileSettingsState(
                         cityName = "New York, NY, USA", timezoneId = "America/New_York",

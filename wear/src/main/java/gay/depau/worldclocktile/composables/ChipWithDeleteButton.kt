@@ -1,5 +1,8 @@
 package gay.depau.worldclocktile.composables
 
+// SPDX-License-Identifier: Apache-2.0
+// This file is part of World Clock Tile.
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures

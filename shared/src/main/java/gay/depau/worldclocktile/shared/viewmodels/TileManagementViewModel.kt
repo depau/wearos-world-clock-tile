@@ -3,12 +3,6 @@ package gay.depau.worldclocktile.shared.viewmodels
 // SPDX-License-Identifier: Apache-2.0
 // This file is part of World Clock Tile.
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import gay.depau.worldclocktile.shared.MAX_TILE_ID
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +30,9 @@ class TileManagementViewModel : ViewModel(), gay.depau.worldclocktile.shared.Set
             it.copy(
                 tileSettings = it.tileSettings + (tileId to TileSettingsState(
                     settings.timezoneId, settings.cityName, settings.time24h, settings.listOrder, settings.colorScheme
-                ))
+                )),
+                enabledTileIds = if (settings.isEnabled) it.enabledTileIds + tileId
+                else it.enabledTileIds - tileId
             )
         }
     }

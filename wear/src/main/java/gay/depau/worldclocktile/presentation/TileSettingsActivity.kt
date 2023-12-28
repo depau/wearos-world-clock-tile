@@ -60,6 +60,7 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyListAnchorType
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.ContentAlpha
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Switch
@@ -91,11 +92,11 @@ import gay.depau.worldclocktile.shared.utils.ColorScheme
 import gay.depau.worldclocktile.shared.utils.PreviewContextWrapper
 import gay.depau.worldclocktile.shared.utils.composeColor
 import gay.depau.worldclocktile.shared.utils.currentTimeAt
+import gay.depau.worldclocktile.shared.utils.dynamicDarkColorPalette
 import gay.depau.worldclocktile.shared.utils.reducedPrecision
 import gay.depau.worldclocktile.shared.utils.timezoneOffsetDescription
 import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
 import gay.depau.worldclocktile.shared.viewmodels.TileSettingsState
-import gay.depau.worldclocktile.utils.foreground
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -263,15 +264,19 @@ fun ColorIcon(
 ) {
     val context = LocalContext.current
     val iconColor by remember { derivedStateOf { colorScheme.getColor(context).composeColor } }
-    val iconBorderColor by remember { derivedStateOf { appColorScheme.getColor(context).composeColor } }
+    val appColorSeed by remember { derivedStateOf { appColorScheme.getColor(context).composeColor } }
+    val appPalette = dynamicDarkColorPalette(appColorSeed)
     val colorName: String by remember {
         derivedStateOf { colorScheme.getName(context) }
     }
 
     Icon(
         modifier = modifier.border(
-            3.dp, shape = CircleShape, color = iconBorderColor.foreground
-        ), imageVector = ImageVector.vectorResource(R.drawable.color_preview), contentDescription = "Color: $colorName",
+            3.dp, shape = CircleShape,
+            color = appPalette.onPrimary
+        ),
+        imageVector = ImageVector.vectorResource(R.drawable.color_preview),
+        contentDescription = "Color: $colorName",
         tint = iconColor
     )
 }
@@ -430,16 +435,19 @@ fun MainSettingsView(
             item("24hourButton") {
                 val context = LocalContext.current
                 val themeColor by remember { derivedStateOf { state.colorScheme.getColor(context).composeColor } }
+                val palette = dynamicDarkColorPalette(themeColor)
+
                 ToggleChip(modifier = itemsModifier.fillMaxWidth(), checked = state.time24h,
                     onCheckedChange = { set24Hour(it) }, label = { Text("24 hour time") },
-                    colors = toggleChipColors(colorScheme = state.colorScheme), toggleControl = {
+                    colors = toggleChipColors(colorScheme = state.colorScheme),
+                    toggleControl = {
                         Switch(
                             checked = state.time24h, onCheckedChange = { set24Hour(it) },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = themeColor.foreground.copy(alpha = 0.5f),
-                                uncheckedThumbColor = themeColor.foreground.copy(alpha = 0.5f),
-                                checkedTrackColor = themeColor.foreground.copy(alpha = 0.3f),
-                                uncheckedTrackColor = themeColor.foreground.copy(alpha = 0.3f),
+                                checkedThumbColor = palette.primary,
+                                checkedTrackColor = palette.primary.copy(alpha = 0.5f),
+                                uncheckedThumbColor = palette.onSurface.copy(alpha = 0.6f),
+                                uncheckedTrackColor = palette.onSurface.copy(alpha = 0.6f * ContentAlpha.disabled),
                             )
                         )
                     })
@@ -448,7 +456,8 @@ fun MainSettingsView(
             item("spacer4") { Spacer(modifier = itemsModifier.height(8.dp)) }
 
             item("manageTilesButton") {
-                Chip(modifier = itemsModifier.fillMaxWidth(), label = { Text("All cities…") }, onClick = openTileManagement,
+                Chip(modifier = itemsModifier.fillMaxWidth(), label = { Text("All cities…") },
+                    onClick = openTileManagement,
                     colors = themedChipColors { state.colorScheme }, icon = {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_globe),

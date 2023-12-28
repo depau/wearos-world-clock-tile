@@ -3,6 +3,7 @@ package gay.depau.worldclocktile.shared.utils
 // SPDX-License-Identifier: Apache-2.0
 // This file is part of World Clock Tile.
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import gay.depau.worldclocktile.shared.utils.monet.MonetColorScheme
 import androidx.compose.ui.graphics.Color as ComposeColor
@@ -59,6 +60,22 @@ interface DynamicColorPalette {
     val inverseSurface: ComposeColor
     val inverseOnSurface: ComposeColor
     val outline: ComposeColor
+}
+
+fun DynamicColorPalette.contentColorFor(backgroundColor: Color): Color {
+    return when (backgroundColor) {
+        primary -> onPrimary
+        primaryContainer -> onPrimaryContainer
+        secondary -> onSecondary
+        secondaryContainer -> onSecondaryContainer
+        tertiary -> onTertiary
+        tertiaryContainer -> onTertiaryContainer
+        background -> onBackground
+        surface -> onSurface
+        surfaceVariant -> onSurfaceVariant
+        inverseSurface -> inverseOnSurface
+        else -> Color.Unspecified
+    }
 }
 
 class DynamicLightColorPalette(val colorScheme: MonetColorScheme) : DynamicColorPalette {

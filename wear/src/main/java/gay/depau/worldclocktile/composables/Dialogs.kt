@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Done
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldDefaults
@@ -26,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -43,7 +41,7 @@ import androidx.wear.compose.material.dialog.Dialog
 import androidx.wear.tooling.preview.devices.WearDevices
 import gay.depau.worldclocktile.shared.utils.ColorScheme
 import gay.depau.worldclocktile.shared.utils.composeColor
-import gay.depau.worldclocktile.utils.foreground
+import gay.depau.worldclocktile.shared.utils.dynamicDarkColorPalette
 
 @Composable
 fun YesNoConfirmationDialog(
@@ -84,7 +82,6 @@ fun YesNoConfirmationDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun TextInputDialog(
     showDialog: Boolean,
@@ -110,6 +107,7 @@ fun TextInputDialog(
         var text by rememberSaveable { mutableStateOf(initialValue()) }
         val context = LocalContext.current
         val themeColor by remember { derivedStateOf { colorScheme.getColor(context).composeColor } }
+        val palette = dynamicDarkColorPalette(themeColor)
 
         Alert(
             title = title,
@@ -120,8 +118,8 @@ fun TextInputDialog(
                         dismissDialog()
                     },
                     colors = ButtonDefaults.primaryButtonColors(
-                        backgroundColor = themeColor,
-                        contentColor = themeColor.foreground
+                        backgroundColor = palette.primary,
+                        contentColor = palette.onPrimary,
                     )
                 ) {
                     Icon(Icons.TwoTone.Done, "Submit")

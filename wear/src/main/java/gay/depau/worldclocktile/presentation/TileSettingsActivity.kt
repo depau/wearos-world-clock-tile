@@ -10,8 +10,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,12 +40,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -98,6 +104,7 @@ import gay.depau.worldclocktile.shared.utils.timezoneOffsetDescription
 import gay.depau.worldclocktile.shared.utils.timezoneSimpleNames
 import gay.depau.worldclocktile.shared.viewmodels.TileSettingsState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -272,11 +279,8 @@ fun ColorIcon(
 
     Icon(
         modifier = modifier.border(
-            3.dp, shape = CircleShape,
-            color = appPalette.onPrimary
-        ),
-        imageVector = ImageVector.vectorResource(R.drawable.color_preview),
-        contentDescription = "Color: $colorName",
+            3.dp, shape = CircleShape, color = appPalette.onPrimary
+        ), imageVector = ImageVector.vectorResource(R.drawable.color_preview), contentDescription = "Color: $colorName",
         tint = iconColor
     )
 }
@@ -439,8 +443,7 @@ fun MainSettingsView(
 
                 ToggleChip(modifier = itemsModifier.fillMaxWidth(), checked = state.time24h,
                     onCheckedChange = { set24Hour(it) }, label = { Text("24 hour time") },
-                    colors = toggleChipColors(colorScheme = state.colorScheme),
-                    toggleControl = {
+                    colors = toggleChipColors(colorScheme = state.colorScheme), toggleControl = {
                         Switch(
                             checked = state.time24h, onCheckedChange = { set24Hour(it) },
                             colors = SwitchDefaults.colors(
@@ -457,8 +460,7 @@ fun MainSettingsView(
 
             item("manageTilesButton") {
                 Chip(modifier = itemsModifier.fillMaxWidth(), label = { Text("All cities…") },
-                    onClick = openTileManagement,
-                    colors = themedChipColors { state.colorScheme }, icon = {
+                    onClick = openTileManagement, colors = themedChipColors { state.colorScheme }, icon = {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_globe),
                             contentDescription = "View all cities"
@@ -498,43 +500,68 @@ fun ColorSelectionView(setColorScheme: (ColorScheme) -> Unit, selectedColor: Col
     val listState = rememberScalingLazyListState(
         initialCenterItemIndex = ColorScheme.entries.indexOf(selectedColor) + 2
     )
-    var forceRefresh by remember { mutableStateOf(false) }
-    var refreshScrollPosition by remember { mutableStateOf<Int?>(null) }
 
-    // Changing the color triggers 3 full redraws:
-    // - forceRefresh becomes true, the list is emptied and it is set back to false
-    // - forceRefresh becomes false, the list is drawn but it's scrolled all the way to the top;
-    //   we scroll it back to the selected color
-    // - refreshScrollPosition becomes null, the list is drawn at the correct position
-    if (!forceRefresh && refreshScrollPosition != null) {
-        LaunchedEffect(refreshScrollPosition) {
-            listState.scrollToItem(refreshScrollPosition!!)
-            refreshScrollPosition = null
+    var boxOpacity by remember { mutableStateOf(0f) }
+    var doSmoothRedraw by remember { mutableStateOf(false) }
+    var keySuffix by remember { mutableIntStateOf(0) }
+    var refreshScrollPosition by remember { mutableIntStateOf(0) }
+
+    // We try to hide the above procedure by fading the list in and out
+    LaunchedEffect(doSmoothRedraw) {
+        if (doSmoothRedraw) {
+            try {
+                val animationSpec = spring<Float>()
+
+                // Fade to black
+                boxOpacity = 0f
+                animate(initialValue = 0f, targetValue = 1f, animationSpec = animationSpec) { value, _ ->
+                    boxOpacity = value
+                }
+
+                // Refill list
+                keySuffix++
+
+                // Wait for that to finish
+                withTimeout(1000) {
+                    val itemInfo = listState.layoutInfo.visibleItemsInfo
+                    do {
+                        delay(100)
+                    } while (itemInfo.isEmpty())
+                }
+
+                println("scrolling to $refreshScrollPosition")
+                listState.scrollToItem(refreshScrollPosition)
+
+                // Wait a little more for scrolling to finish
+                delay(100)
+
+                // Fade back to normal
+                animate(initialValue = 1f, targetValue = 0f, animationSpec = animationSpec) { value, _ ->
+                    boxOpacity = value
+                }
+            } finally {
+                boxOpacity = 0f
+                doSmoothRedraw = false
+            }
         }
     }
 
     MainView(listState) {
-        ScalingLazyColumnWithRSB(
-            state = listState,
-            autoCentering = AutoCenteringParams(itemIndex = 1),
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(
-                space = 4.dp, alignment = Alignment.Top
-            ),
-            anchorType = ScalingLazyListAnchorType.ItemCenter,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            item("heading") { Text("Colors") }
-            item("spacer") { Spacer(modifier = Modifier) }
+        Box {
+            ScalingLazyColumnWithRSB(
+                state = listState,
+                autoCentering = AutoCenteringParams(itemIndex = 1),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(
+                    space = 4.dp, alignment = Alignment.Top
+                ),
+                anchorType = ScalingLazyListAnchorType.ItemCenter,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                item("heading") { Text("Colors") }
+                item("spacer") { Spacer(modifier = Modifier) }
 
-            if (forceRefresh) {
-                item("forceRefresh") {
-                    LaunchedEffect(Unit) {
-                        forceRefresh = false
-                    }
-                }
-            } else {
-                items(items = ColorScheme.entries.toTypedArray(), key = { it.name }) { colorScheme ->
+                items(items = ColorScheme.entries.toTypedArray(), key = { "${it.name}${keySuffix}" }) { colorScheme ->
                     val isCurrentColor = remember(colorScheme, selectedColor) {
                         colorScheme == selectedColor
                     }
@@ -542,9 +569,8 @@ fun ColorSelectionView(setColorScheme: (ColorScheme) -> Unit, selectedColor: Col
                     Chip(modifier = Modifier.fillMaxWidth(),
                         label = { Text(colorScheme.getName(LocalContext.current)) }, onClick = {
                             setColorScheme(colorScheme)
-                            forceRefresh = true
-                            println(listState.centerItemIndex)
                             refreshScrollPosition = listState.centerItemIndex
+                            doSmoothRedraw = true
                         }, colors = chipGradientColors(
                             checked = isCurrentColor, colorScheme = selectedColor
                         ), icon = {
@@ -554,6 +580,11 @@ fun ColorSelectionView(setColorScheme: (ColorScheme) -> Unit, selectedColor: Col
                         })
                 }
             }
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = boxOpacity))
+            ) {}
         }
     }
 }

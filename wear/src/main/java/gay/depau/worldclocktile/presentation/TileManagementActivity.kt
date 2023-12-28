@@ -22,9 +22,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -54,7 +52,6 @@ import gay.depau.worldclocktile.WorldClockTileService.Companion.setTileEnabled
 import gay.depau.worldclocktile.composables.ChipWithDeleteButton
 import gay.depau.worldclocktile.composables.MainView
 import gay.depau.worldclocktile.composables.ScalingLazyColumnWithRSB
-import gay.depau.worldclocktile.composables.YesNoConfirmationDialog
 import gay.depau.worldclocktile.presentation.views.AboutView
 import gay.depau.worldclocktile.shared.MAX_TILE_ID
 import gay.depau.worldclocktile.shared.TileSettings
@@ -184,9 +181,7 @@ fun TileManagementView(
 ) {
     val listState = rememberScalingLazyListState()
     val state by viewModel.state.collectAsState()
-    var tileToDelete by remember { mutableStateOf<Int?>(null) }
     val canRemoveTiles by viewModel.canRemoveTiles()
-    val showDeleteDialog by remember { derivedStateOf { tileToDelete != null && canRemoveTiles } }
     val sortedTileIds by remember {
         derivedStateOf {
             state.enabledTileIds.sortedBy { state.tileSettings[it]!!.listOrder }.toList()
@@ -243,7 +238,7 @@ fun TileManagementView(
                     },
                     colorScheme = settings.colorScheme,
                     onClick = { openTileSettings(i) },
-                    onDelete = { tileToDelete = i },
+                    onDelete = { setTileEnabled(i, false) },
                 )
             }
             item("spacer2") { Spacer(modifier = Modifier.height(8.dp)) }
@@ -290,19 +285,6 @@ fun TileManagementView(
                 }
             }
         }
-    }
-
-    val tileToDeleteName by remember { derivedStateOf { state.tileSettings[tileToDelete]?.cityName } }
-    YesNoConfirmationDialog(showDialog = showDeleteDialog, title = {
-        Text(text = "Delete tile?")
-    }, onYes = {
-        setTileEnabled(tileToDelete!!, false)
-        tileToDelete = null
-    }, dismissDialog = { tileToDelete = null }) {
-        Text(
-            text = tileToDeleteName ?: "[Not set]", maxLines = 2, overflow = TextOverflow.Ellipsis,
-            fontStyle = if (tileToDeleteName == null) FontStyle.Italic else null
-        )
     }
 }
 

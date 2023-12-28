@@ -3,50 +3,39 @@ package gay.depau.worldclocktile.composables
 // SPDX-License-Identifier: Apache-2.0
 // This file is part of World Clock Tile.
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
+import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
+import androidx.wear.compose.foundation.RevealActionType
+import androidx.wear.compose.foundation.RevealValue
+import androidx.wear.compose.foundation.rememberRevealState
 import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.SwipeToRevealChip
+import androidx.wear.compose.material.SwipeToRevealDefaults
+import androidx.wear.compose.material.SwipeToRevealPrimaryAction
+import androidx.wear.compose.material.SwipeToRevealUndoAction
+import androidx.wear.compose.material.Text
 import gay.depau.worldclocktile.presentation.theme.themedChipColors
 import gay.depau.worldclocktile.shared.utils.ColorScheme
-import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalWearFoundationApi::class, ExperimentalWearMaterialApi::class)
 @Composable
 fun ChipWithDeleteButton(
     modifier: Modifier = Modifier,
@@ -58,82 +47,86 @@ fun ChipWithDeleteButton(
     secondaryLabel: @Composable (RowScope.() -> Unit)? = null,
     colorScheme: ColorScheme,
 ) {
-    val density = LocalDensity.current
-    var isRevealed by remember { mutableStateOf(false) }
-    val cardOffset = with(density) { (-48).dp.toPx() }
-    val revealTransition by animateFloatAsState(
-        targetValue = if (isRevealed && deleteEnabled) cardOffset else 0f
-    )
 
-    var offsetX by remember { mutableStateOf(0f) }
-    val dragTransition by animateFloatAsState(targetValue = offsetX)
+    if (deleteEnabled) {
+        val revealState = rememberRevealState()
+        val scope = rememberCoroutineScope()
+        var hide by remember { mutableStateOf(false) }
+        var pendingDelete by remember { mutableStateOf(false) }
 
-    var rawChipWidth by remember { mutableStateOf(0) }
-    var rawChipHeight by remember { mutableStateOf(0) }
-    val chipHeight by remember(rawChipHeight) {
-        mutableStateOf(with(density) { rawChipHeight.toDp() })
-    }
-
-    Box(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { println("click") }
-                .height(chipHeight)
-                .clip(RoundedCornerShape(corner = CornerSize(50)))
-                .paint(
-                    painter = ColorPainter(MaterialTheme.colorScheme.error),
-                    contentScale = ContentScale.Crop
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = onDelete,
-                enabled = deleteEnabled,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete, contentDescription = null,
-                    tint = Color.White
-                )
+        LaunchedEffect(pendingDelete) {
+            if (pendingDelete) {
+                scope.launch {
+                    revealState.animateTo(RevealValue.Revealed)
+                    delay(2000)
+                    if (pendingDelete) {
+                        hide = true
+                        delay(200)
+                        onDelete()
+                        pendingDelete = false
+                        hide = false
+                    }
+                }
+            } else {
+                revealState.animateTo(RevealValue.Covered)
             }
         }
 
-        val offset = if (deleteEnabled) (dragTransition + revealTransition)
-            .coerceIn(cardOffset, 0f) else 0f
-
-        Chip(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onSizeChanged {
-                    rawChipHeight = it.height
-                    rawChipWidth = it.width
-                }
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragStart = {
-                            offsetX = 0f
-                        }, onDragEnd = {
-                            isRevealed = (offsetX < cardOffset / 2) && deleteEnabled
-                            offsetX = 0f
-                        }, onDragCancel = {
-                            isRevealed = (offsetX < cardOffset / 2) && deleteEnabled
-                            offsetX = 0f
-                        }) { change, dragAmount ->
-                        change.consume()
-                        offsetX += dragAmount
-                    }
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures { offset ->
-                        if (isRevealed && deleteEnabled && offset.x > rawChipWidth + cardOffset) {
-                            onDelete()
+        AnimatedVisibility(!hide) {
+            SwipeToRevealChip(
+                revealState = revealState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Use edgeSwipeToDismiss to allow SwipeToDismissBox to capture swipe events
+//            .edgeSwipeToDismiss(swipeToDismissBoxState)
+                    .semantics {
+                        // Use custom actions to make the primary and secondary actions accessible
+                        customActions = listOf(
+                            CustomAccessibilityAction("Delete") {
+                                /* Add the primary action click handler here */
+                                true
+                            },
+                        )
+                    },
+                primaryAction = {
+                    SwipeToRevealPrimaryAction(
+                        revealState = revealState,
+                        icon = { Icon(SwipeToRevealDefaults.Delete, "Delete") },
+                        label = { Text("Delete") },
+                        onClick = {
+                            revealState.lastActionType = RevealActionType.PrimaryAction
+                            pendingDelete = true
                         }
-                    }
+                    )
+                },
+                undoPrimaryAction = {
+                    SwipeToRevealUndoAction(
+                        revealState = revealState,
+                        label = { Text("Undo") },
+                        onClick = {
+                            revealState.lastActionType = RevealActionType.UndoAction
+                            pendingDelete = false
+                        }
+                    )
+                },
+                onFullSwipe = {
+                    revealState.lastActionType = RevealActionType.PrimaryAction
+                    pendingDelete = true
                 }
-                .offset { IntOffset(offset.roundToInt(), 0) }
-                .shadow(elevation = (offset / cardOffset) * 16.dp, shape = RoundedCornerShape(corner = CornerSize(50))),
+            ) {
+                Chip(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = onClick,
+                    enabled = chipEnabled,
+                    label = label,
+                    secondaryLabel = secondaryLabel,
+                    colors = themedChipColors { colorScheme })
+            }
+        }
+    } else {
+        Chip(
+            modifier = modifier,
             onClick = onClick,
             enabled = chipEnabled,
             label = label,

@@ -83,5 +83,14 @@ class TileSettings(private val context: Context, val tileId: Int? = null) : Sett
             val settings = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
             return settings.all.filter { it.key.endsWith("_listOrder") }.count()
         }
+
+        fun getFirstAvailableTileId(context: Context): Int {
+            val settings = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            for (i in 0..MAX_TILE_ID) {
+                if (!settings.contains("tile$i" + "_listOrder"))
+                    return i
+            }
+            throw IllegalStateException("No available tile ID")
+        }
     }
 }

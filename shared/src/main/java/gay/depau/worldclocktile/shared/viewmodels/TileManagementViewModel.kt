@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.update
 data class TileManagementState(
     val enabledTileIds: List<Int>,
     val tileSettings: Map<Int, TileSettingsState>,
+    val hiddenTileIds: Set<Int> = emptySet(),
     val canAddRemoveTiles: Boolean = false,
 ) {
     val firstAvailableTileId: Int
@@ -31,7 +32,7 @@ class TileManagementViewModel : ViewModel(), gay.depau.worldclocktile.shared.Set
                 tileSettings = it.tileSettings + (tileId to TileSettingsState(
                     settings.timezoneId, settings.cityName, settings.time24h, settings.listOrder, settings.colorScheme
                 )),
-                enabledTileIds = if (settings.isEnabled) it.enabledTileIds + tileId
+                enabledTileIds = if (settings.isEnabled) (it.enabledTileIds + tileId).distinct()
                 else it.enabledTileIds - tileId
             )
         }
@@ -53,6 +54,13 @@ class TileManagementViewModel : ViewModel(), gay.depau.worldclocktile.shared.Set
     fun setCanAddRemoveTiles(value: Boolean) {
         _state.update {
             it.copy(canAddRemoveTiles = value)
+        }
+    }
+
+    fun setTileHidden(tileId: Int, hidden: Boolean) {
+        _state.update {
+            it.copy(hiddenTileIds = if (hidden) it.hiddenTileIds + tileId
+            else it.hiddenTileIds - tileId)
         }
     }
 }

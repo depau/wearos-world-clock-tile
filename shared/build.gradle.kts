@@ -43,6 +43,7 @@ dependencies {
     val composeVersion: String by rootProject.extra
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.ui:ui-graphics:$composeVersion")
+    implementation("androidx.compose.runtime:runtime-android:$composeVersion")
     implementation("androidx.wear.compose:compose-material:1.2.1")
 
     testImplementation("org.robolectric:robolectric:4.9.2")

@@ -43,10 +43,10 @@ import androidx.wear.compose.material.dialog.Dialog
 import androidx.wear.remote.interactions.RemoteActivityHelper
 import androidx.wear.tooling.preview.devices.WearDevices
 import gay.depau.worldclocktile.BuildConfig
-import gay.depau.worldclocktile.R
 import gay.depau.worldclocktile.composables.MainView
 import gay.depau.worldclocktile.composables.ScalingLazyColumnWithRSB
 import java.util.concurrent.Executors
+import gay.depau.worldclocktile.shared.R as sharedR
 
 
 @OptIn(ExperimentalAnimationGraphicsApi::class)
@@ -133,7 +133,7 @@ fun AboutView() {
                     modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     Image(
-                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_launcher_noborder),
+                        painter = androidx.compose.ui.res.painterResource(id = sharedR.drawable.ic_launcher_noborder),
                         contentDescription = "App icon", modifier = Modifier.size(64.dp)
                     )
                 }

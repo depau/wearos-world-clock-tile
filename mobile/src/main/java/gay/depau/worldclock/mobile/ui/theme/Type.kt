@@ -1,5 +1,8 @@
 package gay.depau.worldclock.mobile.ui.theme
 
+// SPDX-License-Identifier: Apache-2.0
+// This file is part of World Clock Tile.
+
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily

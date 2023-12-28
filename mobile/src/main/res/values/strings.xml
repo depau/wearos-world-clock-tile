@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">World Clock</string>
+    <string name="title_activity_about">AboutActivity</string>
+    <string name="write_a_review">Write a review</string>
+    <string name="star_on_github">Star on GitHub</string>
+    <string name="support_the_project">Support the project</string>
+    <string name="developed_by">Developed by %1$s and other %2$s.\nSource code available on %3$s.\nLicensed under the GNU General Public License v3.0; some parts are licensed under the Apache License 2.0.</string>
+    <string name="contributors">contributors</string>
 </resources>
